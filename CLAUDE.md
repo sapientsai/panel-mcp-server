@@ -4,88 +4,125 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a TypeScript library template designed to be cloned/forked for creating new npm packages. It uses the `ts-builds` toolchain for standardized build scripts and dual module format support (CommonJS + ES modules).
-
-**Template Usage**: See STANDARDIZATION_GUIDE.md for applying this pattern to other TypeScript projects.
+Panel MCP Server is an MCP (Model Context Protocol) server that provides LLM council workflow tools for multi-model queries, debates, and reviews. It enables AI clients to orchestrate multi-model workflows where the calling LLM can query multiple models, run debates, get critiques, and synthesize the results.
 
 ## Development Commands
 
-All commands delegate to `ts-builds` for consistency across projects:
+All commands delegate to `ts-builds` for consistency:
 
 ```bash
 pnpm validate        # Main command: format + lint + test + build (use before commits)
 
 pnpm format          # Format code with Prettier
-pnpm format:check    # Check formatting only
-
 pnpm lint            # Fix ESLint issues
-pnpm lint:check      # Check ESLint issues only
-
 pnpm test            # Run tests once
-pnpm test:watch      # Run tests in watch mode
-pnpm test:coverage   # Run tests with coverage
-
 pnpm build           # Production build (outputs to dist/)
 pnpm dev             # Development build with watch mode
-
 pnpm typecheck       # Check TypeScript types
 ```
 
-### Running a Single Test
+### Running the Server
 
 ```bash
-pnpm test -- --testNamePattern="pattern"    # Filter by test name
-pnpm test -- test/specific.spec.ts          # Run specific file
+# stdio transport (for MCP clients)
+node dist/index.js --stdio
+
+# HTTP transport
+node dist/index.js --http 8080
 ```
 
 ## Architecture
 
-### Build System: ts-builds + tsdown
+### Source Structure
 
-- **ts-builds**: Centralized toolchain package providing all build scripts
-- **tsdown**: Underlying bundler (successor to tsup) configured via `ts-builds/tsdown`
-- **Configuration**: `tsdown.config.ts` imports default config from ts-builds
-- **TypeScript**: `tsconfig.json` extends `ts-builds/tsconfig`
-- **Prettier**: Uses `ts-builds/prettier` shared config
-
-### Output Format
-
-- **dist/**: Production builds containing:
-  - `index.cjs` - CommonJS format
-  - `index.mjs` - ES modules format
-  - `index.d.mts` - TypeScript declarations
-- **lib/**: Development builds (also published)
-
-### Package Exports
-
-```json
-{
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
-    }
-  }
-}
+```
+src/
+├── index.ts              # CLI entry point + MCP server with all tools
+├── constants.ts          # Configuration constants with env var support
+├── types.ts              # TypeScript types using functype List
+└── providers/
+    ├── index.ts          # Provider registry, model resolution, query functions
+    ├── config.ts         # Provider configuration from env vars
+    └── rate-limiter.ts   # Semaphore-based rate limiting
 ```
 
-### Testing: Vitest
+### Key Dependencies
 
-- Tests located in `test/*.spec.ts`
-- Uses Vitest with configuration from ts-builds
-- Coverage via v8 provider
+- **fastmcp**: MCP server framework for tool definitions
+- **ai** (Vercel AI SDK): Unified interface for LLM providers
+- **@ai-sdk/\***: Direct provider SDKs (OpenAI, Anthropic, Google, Mistral)
+- **@openrouter/ai-sdk-provider**: OpenRouter for 300+ models
+- **functype**: Functional programming patterns (Option, Either, List, Match, Try)
+- **commander**: CLI argument parsing
+- **zod**: Schema validation for tool parameters
 
-## Key Files
+### Provider System
 
-- `src/index.ts` - Main library entry point
-- `test/*.spec.ts` - Test files
-- `tsdown.config.ts` - Build config (imports from ts-builds)
-- `tsconfig.json` - TypeScript config (extends ts-builds)
-- `.claude/skills/typescript-standards/` - Claude Code skill for applying these standards
+Dual-mode provider support:
+
+1. **OpenRouter mode**: `openrouter/{provider}/{model}` - routes through OpenRouter
+2. **Direct mode**: `{provider}/{model}` - uses direct API if key configured, falls back to OpenRouter
+
+Model resolution logic in `src/providers/index.ts`:
+
+- Parse model string to determine provider
+- Try direct provider if API key configured
+- Fall back to OpenRouter if available
+
+### Functype Patterns
+
+The codebase uses functype for functional programming:
+
+- **List<T>**: Immutable lists for responses, errors, models
+- **Option<T>**: Safe nullable handling (env vars, optional params)
+- **Either<E, A>**: Error handling in model resolution
+- **Match**: Pattern matching for provider selection
+- **Try**: Safe JSON parsing
+- **tryCatchAsync**: Async error handling for API calls
+
+## MCP Tools
+
+| Tool            | Description                               |
+| --------------- | ----------------------------------------- |
+| `health_check`  | Check provider status                     |
+| `list_models`   | List available models by provider         |
+| `query_model`   | Query a single model                      |
+| `council_query` | Query multiple models in parallel         |
+| `debate`        | Run adversarial debate between two models |
+| `critique`      | Get structured critique of a response     |
+
+## Environment Variables
+
+```bash
+# Required (at least one)
+OPENROUTER_API_KEY=sk-or-...
+
+# Optional direct providers
+OPENAI_API_KEY=sk-...
+ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_GENERATIVE_AI_API_KEY=...
+MISTRAL_API_KEY=...
+
+# Configuration
+PANEL_DEFAULT_MODELS=openai/gpt-4o,anthropic/claude-sonnet-4-20250514,google/gemini-2.5-pro
+PANEL_MAX_CONCURRENT=5
+PANEL_REQUEST_TIMEOUT_MS=60000
+```
+
+## Testing
+
+Tests are in `test/*.spec.ts`:
+
+- `constants.spec.ts` - Configuration and env var handling
+- `provider-config.spec.ts` - Provider configuration
+- `rate-limiter.spec.ts` - Semaphore rate limiting
+
+Run specific test:
+
+```bash
+pnpm test -- --testNamePattern="pattern"
+pnpm test -- test/specific.spec.ts
+```
 
 ## Publishing
 

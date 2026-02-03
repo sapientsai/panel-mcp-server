@@ -1,112 +1,192 @@
-## typescript-library-template
+# Panel MCP Server
 
-[![Node.js CI](https://github.com/jordanburke/typescript-library-template/actions/workflows/node.js.yml/badge.svg)](https://github.com/jordanburke/typescript-library-template/actions/workflows/node.js.yml)
-[![CodeQL](https://github.com/jordanburke/typescript-library-template/actions/workflows/codeql.yml/badge.svg)](https://github.com/jordanburke/typescript-library-template/actions/workflows/codeql.yml)
+An MCP (Model Context Protocol) server that provides LLM council workflow tools for multi-model queries, debates, and reviews.
 
-A modern TypeScript library template with standardized build scripts and tooling.
+## Overview
+
+Panel MCP Server enables AI clients (like Claude) to orchestrate multi-model workflows. The calling LLM uses these tools to query multiple models in parallel, run structured debates, get critiques, and then synthesize the results itself.
+
+**Key insight**: The MCP server exposes tools that return structured multi-model responses. The calling LLM decides when/how to use these tools and can further process, compare, or synthesize the collected responses using its own reasoning.
 
 ## Features
 
-- **Modern Build System**: [ts-builds](https://github.com/jordanburke/ts-builds) + [tsdown](https://tsdown.dev/) for fast bundling
-- **Testing**: [Vitest](https://vitest.dev/) with coverage reporting
-- **Code Quality**: ESLint + Prettier with automatic formatting and fixing
-- **Dual Format**: Outputs both CommonJS and ES modules with proper TypeScript declarations
-- **Standardized Scripts**: Consistent commands via ts-builds across all projects
+- **council_query**: Query multiple LLMs in parallel, returning all responses for synthesis
+- **debate**: Run structured adversarial debates between two models
+- **critique**: Get one model to critique another's response
+- **query_model**: Query a single model directly
+- **list_models**: Discover available models by provider
+- **health_check**: Check provider status and connectivity
 
-## Quick Start
+## Provider Support
 
-1. **Use this template** to create a new repository
-2. **Clone your new repository**
-3. **Install dependencies**: `pnpm install`
-4. **Start developing**: `pnpm dev` (builds with watch mode)
-5. **Before committing**: `pnpm validate` (format + lint + test + build)
+### Dual-Mode Provider System
 
-## Development Commands
+1. **OpenRouter mode** (recommended): Use `openrouter/` prefix for any of 300+ models
+   - `openrouter/anthropic/claude-sonnet-4`
+   - `openrouter/openai/gpt-4o`
+   - `openrouter/meta-llama/llama-3.3-70b-instruct`
 
-### Pre-Checkin Command
+2. **Direct mode**: Use provider prefix for direct API calls (lower latency, no fee)
+   - `openai/gpt-4o` - calls OpenAI API directly
+   - `anthropic/claude-sonnet-4-20250514` - calls Anthropic API directly
+   - `google/gemini-2.5-pro` - calls Google API directly
 
-```bash
-pnpm validate  # Main command: format, lint, test, and build everything
-```
+**Default Panel**: GPT-4o + Claude Sonnet 4 + Gemini 2.5 Pro
 
-### Individual Commands
-
-```bash
-# Formatting
-pnpm format        # Format code with Prettier
-pnpm format:check  # Check formatting without writing
-
-# Linting
-pnpm lint          # Fix ESLint issues
-pnpm lint:check    # Check ESLint issues without fixing
-
-# Testing
-pnpm test          # Run tests once
-pnpm test:watch    # Run tests in watch mode
-pnpm test:coverage # Run tests with coverage report
-
-# Building
-pnpm build         # Production build
-pnpm dev           # Development mode with watch
-
-# Type Checking
-pnpm typecheck     # Check TypeScript types
-```
-
-## Publishing
-
-The template automatically runs `pnpm validate` before publishing via the `prepublishOnly` script.
+## Installation
 
 ```bash
-npm version patch|minor|major
-npm publish --access public
+npm install panel-mcp-server
+# or
+pnpm add panel-mcp-server
 ```
 
-## Project Structure
+## Configuration
 
-```
-src/
-├── index.ts          # Main library entry point
-test/
-├── *.spec.ts         # Test files
-dist/                 # Built output (CommonJS + ES modules + types)
-```
-
-## Tooling
-
-- **Build**: [ts-builds](https://github.com/jordanburke/ts-builds) - Centralized TypeScript toolchain
-- **Bundler**: [tsdown](https://tsdown.dev/) - Fast TypeScript bundler (successor to tsup)
-- **Test**: [Vitest](https://vitest.dev/) - Fast unit test framework
-- **Lint**: [ESLint](https://eslint.org/) with TypeScript support
-- **Format**: [Prettier](https://prettier.io/) with ESLint integration
-- **Package Manager**: [pnpm](https://pnpm.io/) for fast, efficient installs
-
-## Claude Code Skill
-
-This repository includes a Claude Code skill to help you apply these standards to other projects:
-
-**Location**: `.claude/skills/typescript-standards/`
-
-**Usage**: When using Claude Code, the skill automatically provides guidance for:
-
-- Creating new libraries from this template
-- Applying these standards to existing TypeScript projects
-- Configuring tooling (ts-builds, Vitest, ESLint, Prettier)
-- Setting up dual module format
-
-**Installation** (for use in other projects):
+Set at least one API key:
 
 ```bash
-# Copy the skill to your Claude Code skills directory
-cp -r .claude/skills/typescript-standards ~/.claude/skills/
+# Required (at least one)
+export OPENROUTER_API_KEY=sk-or-...
+
+# Optional direct providers (lower latency)
+export OPENAI_API_KEY=sk-...
+export ANTHROPIC_API_KEY=sk-ant-...
+export GOOGLE_GENERATIVE_AI_API_KEY=...
+export MISTRAL_API_KEY=...
+
+# Optional configuration
+export PANEL_DEFAULT_MODELS=gpt-4o,claude-sonnet-4-20250514,gemini-2.5-pro
+export PANEL_MAX_CONCURRENT=5
+export PANEL_REQUEST_TIMEOUT_MS=60000
 ```
 
-**References**:
+## Usage
 
-- [CLAUDE.md](./CLAUDE.md) - Development guidance for this project
-- [STANDARDIZATION_GUIDE.md](./STANDARDIZATION_GUIDE.md) - Guide for applying these patterns to existing projects
-- [.claude/skills/typescript-standards/](./.claude/skills/typescript-standards/) - Complete skill documentation
+### As MCP Server (stdio)
 
----
+```bash
+panel-mcp-server --stdio
+```
 
-_This template is based on the earlier work of https://github.com/orabazu/tsup-library-template but updated with modern tooling and standardized scripts._
+### As MCP Server (HTTP)
+
+```bash
+panel-mcp-server --http 8080
+```
+
+### Claude Desktop Configuration
+
+Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "panel": {
+      "command": "npx",
+      "args": ["panel-mcp-server", "--stdio"],
+      "env": {
+        "OPENROUTER_API_KEY": "your-key-here"
+      }
+    }
+  }
+}
+```
+
+## Tools
+
+### council_query
+
+Query multiple LLM models in parallel. Returns all responses for synthesis.
+
+```typescript
+{
+  prompt: string,
+  models?: string[],  // defaults to GPT-4o, Claude Sonnet 4, Gemini 2.5 Pro
+  systemPrompt?: string
+}
+```
+
+### debate
+
+Run a structured adversarial debate between two models.
+
+```typescript
+{
+  topic: string,
+  affirmativeModel: string,
+  negativeModel: string,
+  rounds?: number  // 1-5, default: 2
+}
+```
+
+### critique
+
+Have one model critique a response.
+
+```typescript
+{
+  originalPrompt: string,
+  response: string,
+  criticModel: string,
+  aspects?: string[]  // e.g., ["accuracy", "completeness"]
+}
+```
+
+### query_model
+
+Query a single model directly.
+
+```typescript
+{
+  prompt: string,
+  model: string,
+  systemPrompt?: string
+}
+```
+
+### list_models
+
+List available models by provider.
+
+```typescript
+{
+  provider?: "all" | "openrouter" | "openai" | "anthropic" | "google" | "mistral"
+}
+```
+
+### health_check
+
+Check provider status.
+
+```typescript
+{
+}
+```
+
+## Development
+
+```bash
+# Install dependencies
+pnpm install
+
+# Validate (format + lint + test + build)
+pnpm validate
+
+# Development mode
+pnpm dev
+
+# Run tests
+pnpm test
+```
+
+## Built With
+
+- [FastMCP](https://github.com/punkpeye/fastmcp) - MCP server framework
+- [Vercel AI SDK](https://sdk.vercel.ai/) - LLM provider integrations
+- [functype](https://github.com/jordanburke/functype) - Functional programming patterns
+- [ts-builds](https://github.com/jordanburke/ts-builds) - TypeScript build tooling
+
+## License
+
+MIT

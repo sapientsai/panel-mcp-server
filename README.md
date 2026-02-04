@@ -13,9 +13,21 @@ Panel MCP Server enables AI clients (like Claude) to orchestrate multi-model wor
 - **council_query**: Query multiple LLMs in parallel, returning all responses for synthesis
 - **debate**: Run structured adversarial debates between two models
 - **critique**: Get one model to critique another's response
+- **challenge**: Adversarial stress-testing of ideas with multiple models
 - **query_model**: Query a single model directly
 - **list_models**: Discover available models by provider
 - **health_check**: Check provider status and connectivity
+
+### Main LLM Participation
+
+The calling LLM can optionally include its own position when using panel tools via the `proposedThought` parameter:
+
+| Use Case             | Tool            | `proposedThought` Usage                         |
+| -------------------- | --------------- | ----------------------------------------------- |
+| Gather perspectives  | `council_query` | Optional: share your thought for comparison     |
+| Understand tradeoffs | `debate`        | Optional: share thought and which side it leans |
+| Get feedback         | `critique`      | Required: provide your response                 |
+| Stress-test thinking | `challenge`     | Required: provide thought to stress-test        |
 
 ## Provider Support
 
@@ -103,7 +115,9 @@ Query multiple LLM models in parallel. Returns all responses for synthesis.
 {
   prompt: string,
   models?: string[],  // defaults to GPT-4o, Claude Sonnet 4, Gemini 2.5 Pro
-  systemPrompt?: string
+  systemPrompt?: string,
+  proposedThought?: string,  // share your thought with the council
+  compareMode?: boolean      // ask models to explicitly compare to your thought
 }
 ```
 
@@ -116,7 +130,9 @@ Run a structured adversarial debate between two models.
   topic: string,
   affirmativeModel: string,
   negativeModel: string,
-  rounds?: number  // 1-5, default: 2
+  rounds?: number,  // 1-5, default: 2
+  proposedThought?: string,  // share your thought on the topic
+  leaningSide?: "affirmative" | "negative" | "neutral"  // which side your thought leans
 }
 ```
 
@@ -132,6 +148,21 @@ Have one model critique a response.
   aspects?: string[]  // e.g., ["accuracy", "completeness"]
 }
 ```
+
+### challenge
+
+Have multiple models find weaknesses in a proposed thought. Use for adversarial stress-testing.
+
+```typescript
+{
+  proposedThought: string,  // the thought/claim to challenge
+  context?: string,         // additional context
+  challengers?: string[],   // defaults to GPT-4o, Claude Sonnet 4, Gemini 2.5 Pro
+  challengeTypes?: ("logical" | "factual" | "completeness" | "edge_cases" | "alternatives")[]
+}
+```
+
+Returns structured challenges with severity ratings and reasoning.
 
 ### query_model
 

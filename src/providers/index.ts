@@ -232,11 +232,19 @@ export const queryModel = async (modelString: string, prompt: string, systemProm
 
   return result.fold<QueryResult>(
     (error) => error,
-    (response) => ({
-      model: modelString,
-      text: response.text,
-      latencyMs: Date.now() - startTime,
-    }),
+    (response) => {
+      // Extract actual model/provider from OpenRouter's metadata if available
+      const openrouterMeta = response.providerMetadata?.openrouter as Record<string, unknown> | undefined
+      const actualModel = (openrouterMeta?.model ?? openrouterMeta?.provider ?? openrouterMeta?.id) as
+        | string
+        | undefined
+      return {
+        model: modelString,
+        ...(actualModel && { actualModel }),
+        text: response.text,
+        latencyMs: Date.now() - startTime,
+      }
+    },
   )
 }
 

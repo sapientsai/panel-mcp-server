@@ -12,7 +12,15 @@ import { FastMCP } from "fastmcp"
 import { List, Option, Try } from "functype"
 import { z } from "zod"
 
-import { DEFAULT_DEBATE_ROUNDS, getDefaultModels, MAX_DEBATE_ROUNDS, SERVER_NAME, SERVER_VERSION } from "./constants.js"
+import {
+  ALL_CHALLENGE_TYPES,
+  DEFAULT_CHALLENGER_MODELS,
+  DEFAULT_DEBATE_ROUNDS,
+  getDefaultModels,
+  MAX_DEBATE_ROUNDS,
+  SERVER_NAME,
+  SERVER_VERSION,
+} from "./constants.js"
 import {
   getAvailableModels,
   getConfiguredProviders,
@@ -21,6 +29,9 @@ import {
   queryModels,
 } from "./providers/index.js"
 import {
+  type Challenge,
+  type ChallengeResult,
+  type ChallengeType,
   type CouncilQueryResult,
   type Critique,
   type CritiqueResult,
@@ -28,6 +39,7 @@ import {
   type DebateRound,
   type HealthCheckResult,
   isModelError,
+  type ModelError,
   type ProviderHealth,
 } from "./types.js"
 
@@ -71,6 +83,18 @@ const serializeCritiqueResult = (result: CritiqueResult): object => ({
 const serializeHealthResult = (result: HealthCheckResult): object => ({
   ...result,
   providers: result.providers.toArray(),
+})
+
+const serializeChallengeResult = (result: ChallengeResult): object => ({
+  proposedThought: result.proposedThought,
+  context: result.context,
+  challenges: result.challenges.toArray(),
+  errors: result.errors.toArray(),
+  summary: result.summary,
+  metadata: {
+    ...result.metadata,
+    challengerModels: result.metadata.challengerModels.toArray(),
+  },
 })
 
 const serializeModelsResult = (result: ReturnType<typeof getAvailableModels>): object => ({
@@ -189,6 +213,14 @@ server.addTool({
       .optional()
       .describe("Array of model identifiers. Defaults to GPT-4o, Claude Sonnet 4, and Gemini 2.5 Pro"),
     systemPrompt: z.string().optional().describe("Optional shared system prompt for all models"),
+    proposedThought: z
+      .string()
+      .optional()
+      .describe("A proposed thought/answer to share with the council. Other models will see this context."),
+    compareMode: z
+      .boolean()
+      .optional()
+      .describe("When true, models explicitly compare their answer to the proposed thought."),
   }),
   execute: async (args): Promise<string> => {
     const models = Option(args.models)
@@ -196,7 +228,19 @@ server.addTool({
       .orElse(getDefaultModels())
     const startTime = Date.now()
 
-    const { responses, errors } = await queryModels(models, args.prompt, args.systemPrompt)
+    // Build context from proposed thought if provided
+    const thoughtContext = Option(args.proposedThought)
+      .map((thought) => {
+        const instruction = args.compareMode
+          ? "Compare your analysis with this thought - note agreements and disagreements."
+          : "Consider this context, but provide your own independent analysis."
+        return `\n\nContext: A proposed thought on this question:\n"${thought}"\n\n${instruction}`
+      })
+      .orElse("")
+
+    const enhancedPrompt = `${args.prompt}${thoughtContext}`
+
+    const { responses, errors } = await queryModels(models, enhancedPrompt, args.systemPrompt)
 
     const result: CouncilQueryResult = {
       responses,
@@ -230,10 +274,27 @@ server.addTool({
       .max(MAX_DEBATE_ROUNDS)
       .optional()
       .describe(`Number of debate rounds (1-${MAX_DEBATE_ROUNDS}). Default: ${DEFAULT_DEBATE_ROUNDS}`),
+    proposedThought: z.string().optional().describe("A proposed thought on the topic to share with debaters."),
+    leaningSide: z
+      .enum(["affirmative", "negative", "neutral"])
+      .optional()
+      .describe("Which side the proposed thought leans toward. Default: neutral"),
   }),
   execute: async (args): Promise<string> => {
     const numRounds = Option(args.rounds).orElse(DEFAULT_DEBATE_ROUNDS)
     const startTime = Date.now()
+
+    // Build context from proposed thought if provided
+    const thoughtContext = Option(args.proposedThought)
+      .map((thought) => {
+        const leaningSide = Option(args.leaningSide).orElse("neutral")
+        const leaningDescription =
+          leaningSide === "neutral"
+            ? "This thought is presented neutrally for context."
+            : `This thought leans toward the ${leaningSide} position.`
+        return `\n\nA proposed thought on this topic:\n"${thought}"\n${leaningDescription}`
+      })
+      .orElse("")
 
     type DebateState = {
       readonly rounds: List<DebateRound>
@@ -245,7 +306,7 @@ server.addTool({
     const executeRound = async (state: DebateState, round: number): Promise<DebateState> => {
       const roundContext =
         round === 1
-          ? ""
+          ? thoughtContext
           : `\n\nPrevious arguments in this debate:\n${state.previousArguments}\n\nContinue the debate, responding to the opponent's latest points.`
 
       // Affirmative argues first
@@ -390,6 +451,137 @@ Respond ONLY with the JSON object, no additional text.`
     }
 
     return JSON.stringify(serializeCritiqueResult(critiqueResult), null, 2)
+  },
+})
+
+// ============================================================================
+// Challenge Tool
+// ============================================================================
+
+server.addTool({
+  name: "challenge",
+  description:
+    "Have multiple models find weaknesses in a proposed thought. Returns structured challenges to help strengthen the reasoning. Use for adversarial stress-testing of ideas.",
+  parameters: z.object({
+    proposedThought: z.string().describe("The thought/claim to challenge"),
+    context: z.string().optional().describe("Additional context about the thought"),
+    challengers: z
+      .array(z.string())
+      .optional()
+      .describe("Models to use as challengers. Defaults to GPT-4o, Claude Sonnet 4, and Gemini 2.5 Pro"),
+    challengeTypes: z
+      .array(z.enum(["logical", "factual", "completeness", "edge_cases", "alternatives"]))
+      .optional()
+      .describe("Types of challenges to focus on. Defaults to all types."),
+  }),
+  execute: async (args): Promise<string> => {
+    const challengers = Option(args.challengers)
+      .map((m) => List(m))
+      .orElse(DEFAULT_CHALLENGER_MODELS)
+    const challengeTypes = Option(args.challengeTypes)
+      .filter((t) => t.length > 0)
+      .orElse([...ALL_CHALLENGE_TYPES])
+    const startTime = Date.now()
+
+    const contextClause = Option(args.context)
+      .map((ctx) => `\n\nAdditional context:\n${ctx}`)
+      .orElse("")
+
+    const challengePrompt = `You are a critical analyst tasked with finding weaknesses in an argument or position. Your goal is to help strengthen the reasoning by identifying genuine issues.
+
+Position to analyze:
+"${args.proposedThought}"${contextClause}
+
+Focus on these types of challenges: ${challengeTypes.join(", ")}
+
+Challenge type definitions:
+- logical: Flaws in reasoning, invalid inferences, contradictions
+- factual: Incorrect or unverified claims, missing evidence
+- completeness: Important considerations not addressed, gaps in analysis
+- edge_cases: Scenarios where the position breaks down or fails
+- alternatives: Better approaches or solutions not considered
+
+Provide your challenges in the following JSON format (array of challenges):
+[
+  {
+    "challengeType": "logical|factual|completeness|edge_cases|alternatives",
+    "challenge": "Description of the weakness",
+    "severity": "minor|moderate|significant",
+    "reasoning": "Why this matters"
+  }
+]
+
+Be rigorous but fair. Only raise genuine issues that would help improve the position. If the position is strong, you may return fewer challenges.
+
+Respond ONLY with the JSON array, no additional text.`
+
+    // Query all challengers in parallel
+    const { responses, errors } = await queryModels(challengers, challengePrompt)
+
+    // Parse challenges from each response
+    const extractJson = (text: string): string => {
+      const trimmed = text.trim()
+      return trimmed.startsWith("```") ? trimmed.replace(/```(?:json)?\n?/g, "").trim() : trimmed
+    }
+
+    type ParsedChallenge = {
+      challengeType?: string
+      challenge?: string
+      severity?: string
+      reasoning?: string
+    }
+
+    const allChallenges: Challenge[] = []
+
+    responses.forEach((response) => {
+      const parsed = Try(() => JSON.parse(extractJson(response.text)) as ParsedChallenge[]).fold(
+        () => [] as ParsedChallenge[],
+        (result) => (Array.isArray(result) ? result : []),
+      )
+
+      parsed.forEach((p) => {
+        const challengeType = p.challengeType as ChallengeType | undefined
+        if (challengeType && ALL_CHALLENGE_TYPES.includes(challengeType) && p.challenge && p.severity && p.reasoning) {
+          allChallenges.push({
+            model: response.model,
+            actualModel: response.actualModel,
+            challengeType,
+            challenge: p.challenge,
+            severity: p.severity as "minor" | "moderate" | "significant",
+            reasoning: p.reasoning,
+            latencyMs: response.latencyMs,
+          })
+        }
+      })
+    })
+
+    // Build summary
+    const bySeverity = { minor: 0, moderate: 0, significant: 0 }
+    const byType: Partial<Record<ChallengeType, number>> = {}
+
+    allChallenges.forEach((c) => {
+      bySeverity[c.severity]++
+      byType[c.challengeType] = (byType[c.challengeType] ?? 0) + 1
+    })
+
+    const result: ChallengeResult = {
+      proposedThought: args.proposedThought,
+      context: args.context,
+      challenges: List(allChallenges),
+      errors: errors as List<ModelError>,
+      summary: {
+        totalChallenges: allChallenges.length,
+        bySeverity,
+        byType,
+      },
+      metadata: {
+        totalLatencyMs: Date.now() - startTime,
+        successCount: responses.size,
+        challengerModels: responses.map((r) => r.model),
+      },
+    }
+
+    return JSON.stringify(serializeChallengeResult(result), null, 2)
   },
 })
 

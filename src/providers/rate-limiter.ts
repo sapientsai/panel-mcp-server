@@ -58,16 +58,14 @@ export class Semaphore {
  * Global rate limiter instance
  * Shared across all providers for overall concurrency control
  */
-let globalRateLimiter: Semaphore | undefined
+const rateLimiterHolder: { instance?: Semaphore } = {}
 
 /**
  * Get or create the global rate limiter
  */
 export const getRateLimiter = (): Semaphore => {
-  if (!globalRateLimiter) {
-    globalRateLimiter = new Semaphore(getMaxConcurrent())
-  }
-  return globalRateLimiter
+  rateLimiterHolder.instance ??= new Semaphore(getMaxConcurrent())
+  return rateLimiterHolder.instance
 }
 
 /**

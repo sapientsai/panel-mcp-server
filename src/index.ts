@@ -92,7 +92,7 @@ server.addTool({
   description:
     "Check the health status of configured providers. Returns status for each provider and overall system health.",
   parameters: z.object({}),
-  execute: async (): Promise<string> => {
+  execute: (): Promise<string> => {
     const providers = getConfiguredProviders()
 
     const healthResults: List<ProviderHealth> = providers.map(
@@ -118,7 +118,7 @@ server.addTool({
       timestamp: new Date().toISOString(),
     }
 
-    return JSON.stringify(serializeHealthResult(result), null, 2)
+    return Promise.resolve(JSON.stringify(serializeHealthResult(result), null, 2))
   },
 })
 
@@ -132,25 +132,27 @@ server.addTool({
       .optional()
       .describe("Filter by specific provider, or 'all' for complete list"),
   }),
-  execute: async (args): Promise<string> => {
+  execute: (args): Promise<string> => {
     const allModels = getAvailableModels()
 
-    return Option(args.provider)
-      .filter((p) => p !== "all")
-      .map((provider) => {
-        const providerStatus = allModels.directProviders[provider]
-        return JSON.stringify(
-          {
-            provider,
-            configured: providerStatus.configured,
-            models: providerStatus.models.toArray(),
-            ...(provider === "openrouter" ? { note: allModels.openrouter.note } : {}),
-          },
-          null,
-          2,
-        )
-      })
-      .orElse(JSON.stringify(serializeModelsResult(allModels), null, 2))
+    return Promise.resolve(
+      Option(args.provider)
+        .filter((p) => p !== "all")
+        .map((provider) => {
+          const providerStatus = allModels.directProviders[provider]
+          return JSON.stringify(
+            {
+              provider,
+              configured: providerStatus.configured,
+              models: providerStatus.models.toArray(),
+              ...(provider === "openrouter" ? { note: allModels.openrouter.note } : {}),
+            },
+            null,
+            2,
+          )
+        })
+        .orElse(JSON.stringify(serializeModelsResult(allModels), null, 2)),
+    )
   },
 })
 
@@ -230,57 +232,70 @@ server.addTool({
       .describe(`Number of debate rounds (1-${MAX_DEBATE_ROUNDS}). Default: ${DEFAULT_DEBATE_ROUNDS}`),
   }),
   execute: async (args): Promise<string> => {
-    const rounds = Option(args.rounds).orElse(DEFAULT_DEBATE_ROUNDS)
+    const numRounds = Option(args.rounds).orElse(DEFAULT_DEBATE_ROUNDS)
     const startTime = Date.now()
-    const debateRoundsArr: DebateRound[] = []
-    let previousArguments = ""
 
-    for (let round = 1; round <= rounds; round++) {
+    type DebateState = {
+      readonly rounds: List<DebateRound>
+      readonly previousArguments: string
+    }
+
+    const initialState: DebateState = { rounds: List.empty(), previousArguments: "" }
+
+    const executeRound = async (state: DebateState, round: number): Promise<DebateState> => {
       const roundContext =
         round === 1
           ? ""
-          : `\n\nPrevious arguments in this debate:\n${previousArguments}\n\nContinue the debate, responding to the opponent's latest points.`
+          : `\n\nPrevious arguments in this debate:\n${state.previousArguments}\n\nContinue the debate, responding to the opponent's latest points.`
 
       // Affirmative argues first
-      const affirmativePrompt = `You are participating in a formal debate. You are arguing FOR the following proposition:\n\n"${args.topic}"\n\nThis is round ${round} of ${rounds}.${roundContext}\n\nPresent your arguments clearly and persuasively. ${round > 1 ? "Address your opponent's points and strengthen your position." : "Make your opening argument."}`
+      const affirmativePrompt = `You are participating in a formal debate. You are arguing FOR the following proposition:\n\n"${args.topic}"\n\nThis is round ${round} of ${numRounds}.${roundContext}\n\nPresent your arguments clearly and persuasively. ${round > 1 ? "Address your opponent's points and strengthen your position." : "Make your opening argument."}`
 
       const affirmativeResult = await queryModel(args.affirmativeModel, affirmativePrompt)
 
       if (isModelError(affirmativeResult)) {
-        throw new Error(`Affirmative model failed: ${affirmativeResult.error}`)
+        return Promise.reject(new Error(`Affirmative model failed: ${affirmativeResult.error}`))
       }
 
       // Update context for negative
       const affirmativeArg = `Round ${round} - Affirmative (${args.affirmativeModel}):\n${affirmativeResult.text}`
-      previousArguments += (previousArguments ? "\n\n" : "") + affirmativeArg
+      const updatedArgs = state.previousArguments ? `${state.previousArguments}\n\n${affirmativeArg}` : affirmativeArg
 
       // Negative responds
-      const negativePrompt = `You are participating in a formal debate. You are arguing AGAINST the following proposition:\n\n"${args.topic}"\n\nThis is round ${round} of ${rounds}.\n\nPrevious arguments in this debate:\n${previousArguments}\n\nPresent your counter-arguments clearly and persuasively. Respond to your opponent's points and make your case against the proposition.`
+      const negativePrompt = `You are participating in a formal debate. You are arguing AGAINST the following proposition:\n\n"${args.topic}"\n\nThis is round ${round} of ${numRounds}.\n\nPrevious arguments in this debate:\n${updatedArgs}\n\nPresent your counter-arguments clearly and persuasively. Respond to your opponent's points and make your case against the proposition.`
 
       const negativeResult = await queryModel(args.negativeModel, negativePrompt)
 
       if (isModelError(negativeResult)) {
-        throw new Error(`Negative model failed: ${negativeResult.error}`)
+        return Promise.reject(new Error(`Negative model failed: ${negativeResult.error}`))
       }
 
       // Update context for next round
       const negativeArg = `Round ${round} - Negative (${args.negativeModel}):\n${negativeResult.text}`
-      previousArguments += `\n\n${negativeArg}`
 
-      debateRoundsArr.push({
-        round,
-        affirmative: affirmativeResult.text,
-        negative: negativeResult.text,
-      })
+      return {
+        rounds: state.rounds.add({
+          round,
+          affirmative: affirmativeResult.text,
+          negative: negativeResult.text,
+        }),
+        previousArguments: `${updatedArgs}\n\n${negativeArg}`,
+      }
     }
+
+    // Execute rounds sequentially using reduce
+    const roundNumbers = List(Array.from({ length: numRounds }, (_, i) => i + 1))
+    const finalState = await roundNumbers
+      .toArray()
+      .reduce(async (accPromise, round) => executeRound(await accPromise, round), Promise.resolve(initialState))
 
     const result: DebateResult = {
       topic: args.topic,
       affirmativeModel: args.affirmativeModel,
       negativeModel: args.negativeModel,
-      rounds: List(debateRoundsArr),
+      rounds: finalState.rounds,
       metadata: {
-        totalExchanges: rounds * 2,
+        totalExchanges: numRounds * 2,
         totalLatencyMs: Date.now() - startTime,
       },
     }
@@ -335,17 +350,17 @@ Respond ONLY with the JSON object, no additional text.`
     const result = await queryModel(args.criticModel, critiquePrompt)
 
     if (isModelError(result)) {
-      throw new Error(`Critique failed: ${result.error}`)
+      return JSON.stringify({ error: `Critique failed: ${result.error}` }, null, 2)
     }
 
     // Parse the critique response using Try
+    const extractJson = (text: string): string => {
+      const trimmed = text.trim()
+      return trimmed.startsWith("```") ? trimmed.replace(/```(?:json)?\n?/g, "").trim() : trimmed
+    }
+
     const critique = Try(() => {
-      // Extract JSON from response (handle markdown code blocks)
-      let jsonStr = result.text.trim()
-      if (jsonStr.startsWith("```")) {
-        jsonStr = jsonStr.replace(/```(?:json)?\n?/g, "").trim()
-      }
-      return JSON.parse(jsonStr) as {
+      return JSON.parse(extractJson(result.text)) as {
         strengths?: string[]
         weaknesses?: string[]
         suggestions?: string[]
@@ -395,13 +410,13 @@ program
 
     if (Option.isSome(httpPort)) {
       const port = httpPort.orElse(3000)
-      server.start({
+      void server.start({
         transportType: "httpStream",
         httpStream: { port },
       })
       console.error(`Panel MCP Server running on http://localhost:${port}`)
     } else {
-      server.start({
+      void server.start({
         transportType: "stdio",
       })
     }

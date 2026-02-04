@@ -49,6 +49,8 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.10",
+    "cross-env": "^10.1.0",
+    "rimraf": "^6.1.2",
     "ts-builds": "^2.3.2",
     "tsdown": "^0.18.4"
   },

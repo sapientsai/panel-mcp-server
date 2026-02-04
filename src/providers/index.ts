@@ -46,11 +46,9 @@ const providers: ProviderInstances = {}
  */
 const getOpenRouterProvider = (): Option<ReturnType<typeof createOpenRouter>> => {
   if (!isProviderConfigured("openrouter")) return Option.none()
-  if (!providers.openrouter) {
-    providers.openrouter = createOpenRouter({
-      apiKey: process.env[ENV_KEYS.OPENROUTER_API_KEY],
-    })
-  }
+  providers.openrouter ??= createOpenRouter({
+    apiKey: process.env[ENV_KEYS.OPENROUTER_API_KEY],
+  })
   return Option(providers.openrouter)
 }
 
@@ -59,11 +57,9 @@ const getOpenRouterProvider = (): Option<ReturnType<typeof createOpenRouter>> =>
  */
 const getOpenAIProvider = (): Option<ReturnType<typeof createOpenAI>> => {
   if (!isProviderConfigured("openai")) return Option.none()
-  if (!providers.openai) {
-    providers.openai = createOpenAI({
-      apiKey: process.env[ENV_KEYS.OPENAI_API_KEY],
-    })
-  }
+  providers.openai ??= createOpenAI({
+    apiKey: process.env[ENV_KEYS.OPENAI_API_KEY],
+  })
   return Option(providers.openai)
 }
 
@@ -72,11 +68,9 @@ const getOpenAIProvider = (): Option<ReturnType<typeof createOpenAI>> => {
  */
 const getAnthropicProvider = (): Option<ReturnType<typeof createAnthropic>> => {
   if (!isProviderConfigured("anthropic")) return Option.none()
-  if (!providers.anthropic) {
-    providers.anthropic = createAnthropic({
-      apiKey: process.env[ENV_KEYS.ANTHROPIC_API_KEY],
-    })
-  }
+  providers.anthropic ??= createAnthropic({
+    apiKey: process.env[ENV_KEYS.ANTHROPIC_API_KEY],
+  })
   return Option(providers.anthropic)
 }
 
@@ -85,11 +79,9 @@ const getAnthropicProvider = (): Option<ReturnType<typeof createAnthropic>> => {
  */
 const getGoogleProvider = (): Option<ReturnType<typeof createGoogleGenerativeAI>> => {
   if (!isProviderConfigured("google")) return Option.none()
-  if (!providers.google) {
-    providers.google = createGoogleGenerativeAI({
-      apiKey: process.env[ENV_KEYS.GOOGLE_API_KEY],
-    })
-  }
+  providers.google ??= createGoogleGenerativeAI({
+    apiKey: process.env[ENV_KEYS.GOOGLE_API_KEY],
+  })
   return Option(providers.google)
 }
 
@@ -98,11 +90,9 @@ const getGoogleProvider = (): Option<ReturnType<typeof createGoogleGenerativeAI>
  */
 const getMistralProvider = (): Option<ReturnType<typeof createMistral>> => {
   if (!isProviderConfigured("mistral")) return Option.none()
-  if (!providers.mistral) {
-    providers.mistral = createMistral({
-      apiKey: process.env[ENV_KEYS.MISTRAL_API_KEY],
-    })
-  }
+  providers.mistral ??= createMistral({
+    apiKey: process.env[ENV_KEYS.MISTRAL_API_KEY],
+  })
   return Option(providers.mistral)
 }
 
@@ -134,21 +124,22 @@ const parseModelString = (modelString: string): Either<string, ParsedModel> => {
   // Check other provider prefixes
   const providerEntries = Object.entries(PROVIDER_PREFIXES).filter(([p]) => p !== "openrouter")
 
-  for (const [provider, prefix] of providerEntries) {
-    if (modelString.startsWith(prefix)) {
-      return Right({
+  const matchedEntry = providerEntries.find(([, prefix]) => modelString.startsWith(prefix))
+
+  return Option(matchedEntry)
+    .map(
+      ([provider, prefix]): ParsedModel => ({
         provider: provider as ProviderType,
         model: modelString.slice(prefix.length),
-      })
-    }
-  }
-
-  // Default to openrouter if no prefix and openrouter is configured
-  if (isProviderConfigured("openrouter")) {
-    return Right({ provider: "openrouter" as ProviderType, model: modelString })
-  }
-
-  return Left(`Cannot determine provider for model: ${modelString}. Use a provider prefix (e.g., openai/gpt-4o).`)
+      }),
+    )
+    .map((parsed): Either<string, ParsedModel> => Right(parsed))
+    .orElse(
+      // Default to openrouter if no prefix and openrouter is configured
+      isProviderConfigured("openrouter")
+        ? Right({ provider: "openrouter" as ProviderType, model: modelString })
+        : Left(`Cannot determine provider for model: ${modelString}. Use a provider prefix (e.g., openai/gpt-4o).`),
+    )
 }
 
 /**

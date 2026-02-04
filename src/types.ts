@@ -10,6 +10,7 @@ import type { List } from "functype"
  */
 export type ModelResponse = {
   readonly model: string
+  readonly actualModel?: string // The actual model used (e.g., from OpenRouter's free router)
   readonly text: string
   readonly latencyMs: number
 }
@@ -173,4 +174,42 @@ export type CritiqueParams = {
   readonly response: string
   readonly criticModel: string
   readonly aspects?: List<string>
+}
+
+/**
+ * Challenge types for adversarial stress-testing
+ */
+export type ChallengeType = "logical" | "factual" | "completeness" | "edge_cases" | "alternatives"
+
+/**
+ * A single challenge from a model
+ */
+export type Challenge = {
+  readonly model: string
+  readonly actualModel?: string
+  readonly challengeType: ChallengeType
+  readonly challenge: string
+  readonly severity: "minor" | "moderate" | "significant"
+  readonly reasoning: string
+  readonly latencyMs: number
+}
+
+/**
+ * Result of a challenge request
+ */
+export type ChallengeResult = {
+  readonly proposedThought: string
+  readonly context?: string
+  readonly challenges: List<Challenge>
+  readonly errors: List<ModelError>
+  readonly summary: {
+    readonly totalChallenges: number
+    readonly bySeverity: Record<"minor" | "moderate" | "significant", number>
+    readonly byType: Partial<Record<ChallengeType, number>>
+  }
+  readonly metadata: {
+    readonly totalLatencyMs: number
+    readonly successCount: number
+    readonly challengerModels: List<string>
+  }
 }

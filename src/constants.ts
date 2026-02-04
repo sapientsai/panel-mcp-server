@@ -109,3 +109,20 @@ export const getRequestTimeout = (): number =>
     .map((v) => parseInt(v, 10))
     .filter((n) => !isNaN(n) && n > 0)
     .orElse(DEFAULT_REQUEST_TIMEOUT_MS)
+
+/**
+ * Default challenger models for the challenge tool.
+ * Same balanced selection as council queries.
+ *
+ * Override: PANEL_DEFAULT_CHALLENGERS (comma-separated list)
+ */
+export const DEFAULT_CHALLENGER_MODELS = List.of(
+  "openai/gpt-4o",
+  "anthropic/claude-sonnet-4-20250514",
+  "google/gemini-2.5-pro",
+)
+
+/**
+ * All available challenge types for stress-testing
+ */
+export const ALL_CHALLENGE_TYPES = ["logical", "factual", "completeness", "edge_cases", "alternatives"] as const

@@ -156,7 +156,7 @@ server.addTool({
 server.addTool({
   name: "list_default_models",
   description:
-    "Get the default models that will be used by council_query, debate, challenge, and critique when no models are specified. CALL THIS FIRST before using other tools to see what models are configured.",
+    "Get the default models used when model parameters are omitted. CALL THIS FIRST to confirm what models will be used. All tools use these defaults when you don't specify models.",
   parameters: z.object({}),
   execute: async (): Promise<string> => {
     const models = await getDefaultModelsAsync()
@@ -174,7 +174,7 @@ server.addTool({
 server.addTool({
   name: "list_available_models",
   description:
-    "List all available models by provider. Shows configured direct providers and their models. OpenRouter provides access to 300+ models when configured.",
+    "List available models by provider. Shows configured direct providers and their models. OpenRouter provides access to 300+ models when configured. NOTE: These are for reference only - tools automatically use server-configured defaults unless you override with specific models.",
   parameters: z.object({
     provider: z
       .enum(["all", "openrouter", "openai", "anthropic", "google", "mistral"])
@@ -235,7 +235,7 @@ server.addTool({
       .array(z.string())
       .optional()
       .describe(
-        "Array of model identifiers. Defaults to server-configured models (check list_models for current defaults including free models)",
+        "Model identifiers. OMIT THIS to use server defaults (recommended). Only specify if you need specific models.",
       ),
     systemPrompt: z.string().optional().describe("Optional shared system prompt for all models"),
     proposedThought: z
@@ -292,11 +292,15 @@ server.addTool({
     affirmativeModel: z
       .string()
       .optional()
-      .describe("Model arguing FOR the proposition. Defaults to first server-configured model."),
+      .describe(
+        "Model arguing FOR. OMIT THIS to use server defaults (recommended). Only specify if you need a specific model.",
+      ),
     negativeModel: z
       .string()
       .optional()
-      .describe("Model arguing AGAINST the proposition. Defaults to second server-configured model."),
+      .describe(
+        "Model arguing AGAINST. OMIT THIS to use server defaults (recommended). Only specify if you need a specific model.",
+      ),
     rounds: z
       .number()
       .min(1)
@@ -411,7 +415,9 @@ server.addTool({
     criticModel: z
       .string()
       .optional()
-      .describe("The model to perform the critique. Defaults to first server-configured model."),
+      .describe(
+        "Model to critique. OMIT THIS to use server defaults (recommended). Only specify if you need a specific model.",
+      ),
     aspects: z
       .array(z.string())
       .optional()
@@ -506,7 +512,7 @@ server.addTool({
       .array(z.string())
       .optional()
       .describe(
-        "Models to use as challengers. Defaults to server-configured models (check list_models for current defaults including free models)",
+        "Challenger models. OMIT THIS to use server defaults (recommended). Only specify if you need specific models.",
       ),
     challengeTypes: z
       .array(z.enum(["logical", "factual", "completeness", "edge_cases", "alternatives"]))

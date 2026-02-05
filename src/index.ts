@@ -14,17 +14,18 @@ import { z } from "zod"
 
 import {
   ALL_CHALLENGE_TYPES,
-  DEFAULT_CHALLENGER_MODELS,
   DEFAULT_DEBATE_ROUNDS,
-  getDefaultModels,
+  getDefaultChallengerModelsAsync,
+  getDefaultModelsAsync,
   MAX_DEBATE_ROUNDS,
   SERVER_NAME,
   SERVER_VERSION,
 } from "./constants.js"
 import {
-  getAvailableModels,
+  getAvailableModelsAsync,
   getConfiguredProviders,
   isProviderConfigured,
+  type ListModelsResultWithFree,
   queryModel,
   queryModels,
 } from "./providers/index.js"
@@ -97,7 +98,7 @@ const serializeChallengeResult = (result: ChallengeResult): object => ({
   },
 })
 
-const serializeModelsResult = (result: ReturnType<typeof getAvailableModels>): object => ({
+const serializeModelsResult = (result: ListModelsResultWithFree): object => ({
   directProviders: Object.fromEntries(
     Object.entries(result.directProviders).map(([key, value]) => [
       key,
@@ -105,6 +106,12 @@ const serializeModelsResult = (result: ReturnType<typeof getAvailableModels>): o
     ]),
   ),
   openrouter: result.openrouter,
+  ...(result.freeModels && {
+    freeModels: {
+      note: result.freeModels.note,
+      models: result.freeModels.models.toArray(),
+    },
+  }),
 })
 
 // ============================================================================
@@ -156,27 +163,25 @@ server.addTool({
       .optional()
       .describe("Filter by specific provider, or 'all' for complete list"),
   }),
-  execute: (args): Promise<string> => {
-    const allModels = getAvailableModels()
+  execute: async (args): Promise<string> => {
+    const allModels = await getAvailableModelsAsync()
 
-    return Promise.resolve(
-      Option(args.provider)
-        .filter((p) => p !== "all")
-        .map((provider) => {
-          const providerStatus = allModels.directProviders[provider]
-          return JSON.stringify(
-            {
-              provider,
-              configured: providerStatus.configured,
-              models: providerStatus.models.toArray(),
-              ...(provider === "openrouter" ? { note: allModels.openrouter.note } : {}),
-            },
-            null,
-            2,
-          )
-        })
-        .orElse(JSON.stringify(serializeModelsResult(allModels), null, 2)),
-    )
+    return Option(args.provider)
+      .filter((p) => p !== "all")
+      .map((provider) => {
+        const providerStatus = allModels.directProviders[provider]
+        return JSON.stringify(
+          {
+            provider,
+            configured: providerStatus.configured,
+            models: providerStatus.models.toArray(),
+            ...(provider === "openrouter" ? { note: allModels.openrouter.note } : {}),
+          },
+          null,
+          2,
+        )
+      })
+      .orElse(JSON.stringify(serializeModelsResult(allModels), null, 2))
   },
 })
 
@@ -223,9 +228,7 @@ server.addTool({
       .describe("When true, models explicitly compare their answer to the proposed thought."),
   }),
   execute: async (args): Promise<string> => {
-    const models = Option(args.models)
-      .map((m) => List(m))
-      .orElse(getDefaultModels())
+    const models = args.models ? List(args.models) : await getDefaultModelsAsync()
     const startTime = Date.now()
 
     // Build context from proposed thought if provided
@@ -475,9 +478,7 @@ server.addTool({
       .describe("Types of challenges to focus on. Defaults to all types."),
   }),
   execute: async (args): Promise<string> => {
-    const challengers = Option(args.challengers)
-      .map((m) => List(m))
-      .orElse(DEFAULT_CHALLENGER_MODELS)
+    const challengers = args.challengers ? List(args.challengers) : await getDefaultChallengerModelsAsync()
     const challengeTypes = Option(args.challengeTypes)
       .filter((t) => t.length > 0)
       .orElse([...ALL_CHALLENGE_TYPES])

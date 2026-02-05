@@ -26,6 +26,7 @@ import type {
   QueryResult,
 } from "../types.js"
 import { isProviderConfigured, KNOWN_DIRECT_MODELS, SAMPLE_OPENROUTER_MODELS } from "./config.js"
+import { getCachedFreeModels } from "./openrouter-models.js"
 import { withRateLimit } from "./rate-limiter.js"
 
 /**
@@ -265,7 +266,7 @@ export const queryModels = async (
 }
 
 /**
- * Get list of available models
+ * Get list of available models (sync version)
  */
 export const getAvailableModels = (): ListModelsResult => {
   const directProviders: Record<ProviderType, ProviderStatus> = {
@@ -296,6 +297,38 @@ export const getAvailableModels = (): ListModelsResult => {
     openrouter: {
       configured: isProviderConfigured("openrouter"),
       note: "OpenRouter supports 300+ models. Use openrouter/{provider}/{model} format.",
+    },
+  }
+}
+
+/**
+ * Extended result with dynamic free models
+ */
+export type ListModelsResultWithFree = ListModelsResult & {
+  readonly freeModels?: {
+    readonly note: string
+    readonly models: List<string>
+  }
+}
+
+/**
+ * Get list of available models with dynamic free models (async version)
+ */
+export const getAvailableModelsAsync = async (): Promise<ListModelsResultWithFree> => {
+  const base = getAvailableModels()
+
+  // Only fetch free models if OpenRouter is configured
+  if (!isProviderConfigured("openrouter")) {
+    return base
+  }
+
+  const freeModels = await getCachedFreeModels()
+
+  return {
+    ...base,
+    freeModels: {
+      note: "Currently available free models (dynamically fetched from OpenRouter)",
+      models: freeModels,
     },
   }
 }

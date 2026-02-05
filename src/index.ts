@@ -604,9 +604,9 @@ program
       const port = httpPort.orElse(3000)
       void server.start({
         transportType: "httpStream",
-        httpStream: { port },
+        httpStream: { port, host: "0.0.0.0" },
       })
-      console.error(`Panel MCP Server running on http://localhost:${port}`)
+      console.error(`Panel MCP Server running on http://0.0.0.0:${port}`)
     } else {
       void server.start({
         transportType: "stdio",

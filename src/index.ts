@@ -156,7 +156,7 @@ server.addTool({
 server.addTool({
   name: "list_models",
   description:
-    "List available models by provider. Shows configured direct providers and their models. OpenRouter provides access to 300+ models when configured.",
+    "List available models by provider. Shows configured direct providers, their models, and the current default models for council_query/challenge (shown in freeModels section). Call this first to see what models will be used by default.",
   parameters: z.object({
     provider: z
       .enum(["all", "openrouter", "openai", "anthropic", "google", "mistral"])
@@ -216,7 +216,9 @@ server.addTool({
     models: z
       .array(z.string())
       .optional()
-      .describe("Array of model identifiers. Defaults to GPT-4o, Claude Sonnet 4, and Gemini 2.5 Pro"),
+      .describe(
+        "Array of model identifiers. Defaults to server-configured models (check list_models for current defaults including free models)",
+      ),
     systemPrompt: z.string().optional().describe("Optional shared system prompt for all models"),
     proposedThought: z
       .string()
@@ -471,7 +473,9 @@ server.addTool({
     challengers: z
       .array(z.string())
       .optional()
-      .describe("Models to use as challengers. Defaults to GPT-4o, Claude Sonnet 4, and Gemini 2.5 Pro"),
+      .describe(
+        "Models to use as challengers. Defaults to server-configured models (check list_models for current defaults including free models)",
+      ),
     challengeTypes: z
       .array(z.enum(["logical", "factual", "completeness", "edge_cases", "alternatives"]))
       .optional()

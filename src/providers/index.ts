@@ -327,7 +327,7 @@ export const getAvailableModelsAsync = async (): Promise<ListModelsResultWithFre
   return {
     ...base,
     freeModels: {
-      note: "Currently available free models (dynamically fetched from OpenRouter)",
+      note: "Default models for council_query and challenge when no models specified (server configured for free tier)",
       models: freeModels,
     },
   }

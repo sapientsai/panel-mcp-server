@@ -66,3 +66,6 @@ export const SAMPLE_OPENROUTER_MODELS = List.of(
   "qwen/qwen-2.5-72b-instruct",
   "mistralai/mistral-large-latest",
 )
+
+// Note: Free OpenRouter models are now dynamically fetched
+// See src/providers/openrouter-models.ts for getFreeModels()

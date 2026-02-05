@@ -154,9 +154,27 @@ server.addTool({
 })
 
 server.addTool({
-  name: "list_models",
+  name: "list_default_models",
   description:
-    "List available models by provider. Shows configured direct providers, their models, and the current default models for council_query/challenge (shown in freeModels section). Call this first to see what models will be used by default.",
+    "Get the default models that will be used by council_query, debate, challenge, and critique when no models are specified. CALL THIS FIRST before using other tools to see what models are configured.",
+  parameters: z.object({}),
+  execute: async (): Promise<string> => {
+    const models = await getDefaultModelsAsync()
+    return JSON.stringify(
+      {
+        defaultModels: models.toArray(),
+        note: "These models are used by default when no models are specified in council_query, debate, challenge, or critique tools.",
+      },
+      null,
+      2,
+    )
+  },
+})
+
+server.addTool({
+  name: "list_available_models",
+  description:
+    "List all available models by provider. Shows configured direct providers and their models. OpenRouter provides access to 300+ models when configured.",
   parameters: z.object({
     provider: z
       .enum(["all", "openrouter", "openai", "anthropic", "google", "mistral"])
@@ -271,8 +289,14 @@ server.addTool({
     "Run a structured adversarial debate between two models on a topic. Returns the full transcript for the calling LLM to analyze, judge, or synthesize key arguments.",
   parameters: z.object({
     topic: z.string().describe("The debate topic or proposition"),
-    affirmativeModel: z.string().describe("Model arguing FOR the proposition"),
-    negativeModel: z.string().describe("Model arguing AGAINST the proposition"),
+    affirmativeModel: z
+      .string()
+      .optional()
+      .describe("Model arguing FOR the proposition. Defaults to first server-configured model."),
+    negativeModel: z
+      .string()
+      .optional()
+      .describe("Model arguing AGAINST the proposition. Defaults to second server-configured model."),
     rounds: z
       .number()
       .min(1)
@@ -286,6 +310,9 @@ server.addTool({
       .describe("Which side the proposed thought leans toward. Default: neutral"),
   }),
   execute: async (args): Promise<string> => {
+    const defaultModels = await getDefaultModelsAsync()
+    const affirmativeModel = args.affirmativeModel ?? defaultModels.get(0).orElse("openrouter/openrouter/free")
+    const negativeModel = args.negativeModel ?? defaultModels.get(1).orElse("openrouter/openrouter/free")
     const numRounds = Option(args.rounds).orElse(DEFAULT_DEBATE_ROUNDS)
     const startTime = Date.now()
 
@@ -317,27 +344,27 @@ server.addTool({
       // Affirmative argues first
       const affirmativePrompt = `You are participating in a formal debate. You are arguing FOR the following proposition:\n\n"${args.topic}"\n\nThis is round ${round} of ${numRounds}.${roundContext}\n\nPresent your arguments clearly and persuasively. ${round > 1 ? "Address your opponent's points and strengthen your position." : "Make your opening argument."}`
 
-      const affirmativeResult = await queryModel(args.affirmativeModel, affirmativePrompt)
+      const affirmativeResult = await queryModel(affirmativeModel, affirmativePrompt)
 
       if (isModelError(affirmativeResult)) {
         return Promise.reject(new Error(`Affirmative model failed: ${affirmativeResult.error}`))
       }
 
       // Update context for negative
-      const affirmativeArg = `Round ${round} - Affirmative (${args.affirmativeModel}):\n${affirmativeResult.text}`
+      const affirmativeArg = `Round ${round} - Affirmative (${affirmativeModel}):\n${affirmativeResult.text}`
       const updatedArgs = state.previousArguments ? `${state.previousArguments}\n\n${affirmativeArg}` : affirmativeArg
 
       // Negative responds
       const negativePrompt = `You are participating in a formal debate. You are arguing AGAINST the following proposition:\n\n"${args.topic}"\n\nThis is round ${round} of ${numRounds}.\n\nPrevious arguments in this debate:\n${updatedArgs}\n\nPresent your counter-arguments clearly and persuasively. Respond to your opponent's points and make your case against the proposition.`
 
-      const negativeResult = await queryModel(args.negativeModel, negativePrompt)
+      const negativeResult = await queryModel(negativeModel, negativePrompt)
 
       if (isModelError(negativeResult)) {
         return Promise.reject(new Error(`Negative model failed: ${negativeResult.error}`))
       }
 
       // Update context for next round
-      const negativeArg = `Round ${round} - Negative (${args.negativeModel}):\n${negativeResult.text}`
+      const negativeArg = `Round ${round} - Negative (${negativeModel}):\n${negativeResult.text}`
 
       return {
         rounds: state.rounds.add({
@@ -357,8 +384,8 @@ server.addTool({
 
     const result: DebateResult = {
       topic: args.topic,
-      affirmativeModel: args.affirmativeModel,
-      negativeModel: args.negativeModel,
+      affirmativeModel,
+      negativeModel,
       rounds: finalState.rounds,
       metadata: {
         totalExchanges: numRounds * 2,
@@ -381,13 +408,18 @@ server.addTool({
   parameters: z.object({
     originalPrompt: z.string().describe("The original prompt that generated the response"),
     response: z.string().describe("The response to critique (from another model or user-provided)"),
-    criticModel: z.string().describe("The model to perform the critique"),
+    criticModel: z
+      .string()
+      .optional()
+      .describe("The model to perform the critique. Defaults to first server-configured model."),
     aspects: z
       .array(z.string())
       .optional()
       .describe("Specific aspects to focus on (e.g., ['accuracy', 'completeness', 'clarity'])"),
   }),
   execute: async (args): Promise<string> => {
+    const defaultModels = await getDefaultModelsAsync()
+    const criticModel = args.criticModel ?? defaultModels.get(0).orElse("openrouter/openrouter/free")
     const aspectsClause = Option(args.aspects)
       .filter((a) => a.length > 0)
       .map((aspects) => `\n\nFocus particularly on these aspects: ${aspects.join(", ")}`)
@@ -413,7 +445,7 @@ Provide your critique in the following JSON format:
 Respond ONLY with the JSON object, no additional text.`
 
     const startTime = Date.now()
-    const result = await queryModel(args.criticModel, critiquePrompt)
+    const result = await queryModel(criticModel, critiquePrompt)
 
     if (isModelError(result)) {
       return JSON.stringify({ error: `Critique failed: ${result.error}` }, null, 2)
@@ -450,7 +482,7 @@ Respond ONLY with the JSON object, no additional text.`
     const critiqueResult: CritiqueResult = {
       critique,
       metadata: {
-        criticModel: args.criticModel,
+        criticModel,
         latencyMs: Date.now() - startTime,
       },
     }

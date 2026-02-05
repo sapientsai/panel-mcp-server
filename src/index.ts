@@ -22,12 +22,11 @@ import {
   SERVER_VERSION,
 } from "./constants.js"
 import {
-  getAvailableModelsAsync,
   getConfiguredProviders,
   isProviderConfigured,
-  type ListModelsResultWithFree,
   queryModel,
   queryModels,
+  searchModels,
 } from "./providers/index.js"
 import {
   type Challenge,
@@ -98,22 +97,6 @@ const serializeChallengeResult = (result: ChallengeResult): object => ({
   },
 })
 
-const serializeModelsResult = (result: ListModelsResultWithFree): object => ({
-  directProviders: Object.fromEntries(
-    Object.entries(result.directProviders).map(([key, value]) => [
-      key,
-      { configured: value.configured, models: value.models.toArray() },
-    ]),
-  ),
-  openrouter: result.openrouter,
-  ...(result.freeModels && {
-    freeModels: {
-      note: result.freeModels.note,
-      models: result.freeModels.models.toArray(),
-    },
-  }),
-})
-
 // ============================================================================
 // Health & Discovery Tools
 // ============================================================================
@@ -172,34 +155,72 @@ server.addTool({
 })
 
 server.addTool({
-  name: "list_available_models",
+  name: "list_providers",
   description:
-    "List available models by provider. Shows configured direct providers and their models. OpenRouter provides access to 300+ models when configured. NOTE: These are for reference only - tools automatically use server-configured defaults unless you override with specific models.",
+    "Check which LLM providers are configured. Use search_models to find specific models on OpenRouter (300+ available).",
+  parameters: z.object({}),
+  execute: (): Promise<string> => {
+    const providers = getConfiguredProviders()
+    const result = {
+      providers: {
+        openrouter: { configured: isProviderConfigured("openrouter") },
+        openai: { configured: isProviderConfigured("openai") },
+        anthropic: { configured: isProviderConfigured("anthropic") },
+        google: { configured: isProviderConfigured("google") },
+        mistral: { configured: isProviderConfigured("mistral") },
+      },
+      configuredCount: providers.size,
+      note: "Use search_models to find specific models on OpenRouter",
+    }
+    return Promise.resolve(JSON.stringify(result, null, 2))
+  },
+})
+
+server.addTool({
+  name: "search_models",
+  description:
+    "Search OpenRouter's 300+ models by name, provider, or capabilities. Use this to find specific models for council_query, debate, or other tools.",
   parameters: z.object({
-    provider: z
-      .enum(["all", "openrouter", "openai", "anthropic", "google", "mistral"])
+    query: z
+      .string()
       .optional()
-      .describe("Filter by specific provider, or 'all' for complete list"),
+      .describe("Search term (model name or provider like 'sonnet', 'claude', 'llama', 'deepseek')"),
+    provider: z
+      .string()
+      .optional()
+      .describe("Filter by provider (e.g., 'anthropic', 'openai', 'meta-llama', 'deepseek')"),
+    maxPrice: z.number().optional().describe("Max price per 1M tokens in dollars"),
+    freeOnly: z.boolean().optional().describe("Only show free models"),
+    limit: z.number().min(1).max(50).optional().describe("Max results (default: 10)"),
   }),
   execute: async (args): Promise<string> => {
-    const allModels = await getAvailableModelsAsync()
+    const result = await searchModels({
+      query: args.query,
+      provider: args.provider,
+      maxPrice: args.maxPrice,
+      freeOnly: args.freeOnly,
+      limit: args.limit,
+    })
 
-    return Option(args.provider)
-      .filter((p) => p !== "all")
-      .map((provider) => {
-        const providerStatus = allModels.directProviders[provider]
-        return JSON.stringify(
-          {
-            provider,
-            configured: providerStatus.configured,
-            models: providerStatus.models.toArray(),
-            ...(provider === "openrouter" ? { note: allModels.openrouter.note } : {}),
+    return JSON.stringify(
+      {
+        models: result.models.toArray().map((m) => ({
+          id: m.id,
+          name: m.name,
+          description: m.description,
+          contextLength: m.contextLength,
+          pricing: {
+            promptPer1M: `$${(parseFloat(m.pricing.prompt) * 1_000_000).toFixed(2)}`,
+            completionPer1M: `$${(parseFloat(m.pricing.completion) * 1_000_000).toFixed(2)}`,
           },
-          null,
-          2,
-        )
-      })
-      .orElse(JSON.stringify(serializeModelsResult(allModels), null, 2))
+        })),
+        totalMatches: result.totalMatches,
+        showing: result.models.size,
+        ...(result.query && { query: result.query }),
+      },
+      null,
+      2,
+    )
   },
 })
 

@@ -17,16 +17,8 @@ import type { Either } from "functype"
 import { Left, List, Match, Option, Right, tryCatchAsync } from "functype"
 
 import { ENV_KEYS, getRequestTimeout, PROVIDER_PREFIXES } from "../constants.js"
-import type {
-  ListModelsResult,
-  ModelError,
-  ModelResponse,
-  ProviderStatus,
-  ProviderType,
-  QueryResult,
-} from "../types.js"
-import { isProviderConfigured, KNOWN_DIRECT_MODELS, SAMPLE_OPENROUTER_MODELS } from "./config.js"
-import { getCachedFreeModels } from "./openrouter-models.js"
+import type { ModelError, ModelResponse, ProviderType, QueryResult } from "../types.js"
+import { isProviderConfigured } from "./config.js"
 import { withRateLimit } from "./rate-limiter.js"
 
 /**
@@ -265,72 +257,5 @@ export const queryModels = async (
   return { responses, errors }
 }
 
-/**
- * Get list of available models (sync version)
- */
-export const getAvailableModels = (): ListModelsResult => {
-  const directProviders: Record<ProviderType, ProviderStatus> = {
-    openrouter: {
-      configured: isProviderConfigured("openrouter"),
-      models: isProviderConfigured("openrouter") ? SAMPLE_OPENROUTER_MODELS : List.empty(),
-    },
-    openai: {
-      configured: isProviderConfigured("openai"),
-      models: isProviderConfigured("openai") ? KNOWN_DIRECT_MODELS.openai : List.empty(),
-    },
-    anthropic: {
-      configured: isProviderConfigured("anthropic"),
-      models: isProviderConfigured("anthropic") ? KNOWN_DIRECT_MODELS.anthropic : List.empty(),
-    },
-    google: {
-      configured: isProviderConfigured("google"),
-      models: isProviderConfigured("google") ? KNOWN_DIRECT_MODELS.google : List.empty(),
-    },
-    mistral: {
-      configured: isProviderConfigured("mistral"),
-      models: isProviderConfigured("mistral") ? KNOWN_DIRECT_MODELS.mistral : List.empty(),
-    },
-  }
-
-  return {
-    directProviders,
-    openrouter: {
-      configured: isProviderConfigured("openrouter"),
-      note: "OpenRouter supports 300+ models. Use openrouter/{provider}/{model} format.",
-    },
-  }
-}
-
-/**
- * Extended result with dynamic free models
- */
-export type ListModelsResultWithFree = ListModelsResult & {
-  readonly freeModels?: {
-    readonly note: string
-    readonly models: List<string>
-  }
-}
-
-/**
- * Get list of available models with dynamic free models (async version)
- */
-export const getAvailableModelsAsync = async (): Promise<ListModelsResultWithFree> => {
-  const base = getAvailableModels()
-
-  // Only fetch free models if OpenRouter is configured
-  if (!isProviderConfigured("openrouter")) {
-    return base
-  }
-
-  const freeModels = await getCachedFreeModels()
-
-  return {
-    ...base,
-    freeModels: {
-      note: "Default models for council_query and challenge when no models specified (server configured for free tier)",
-      models: freeModels,
-    },
-  }
-}
-
 export { getConfiguredProviders, isProviderConfigured } from "./config.js"
+export { searchModels } from "./openrouter-models.js"

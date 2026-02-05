@@ -1,11 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest"
 
-import {
-  isProviderConfigured,
-  getConfiguredProviders,
-  KNOWN_DIRECT_MODELS,
-  SAMPLE_OPENROUTER_MODELS,
-} from "../src/providers/config"
+import { isProviderConfigured, getConfiguredProviders } from "../src/providers/config"
 
 describe("provider config", () => {
   const originalEnv = process.env
@@ -67,20 +62,6 @@ describe("provider config", () => {
       expect(providers.contains("openai")).toBe(true)
       expect(providers.contains("anthropic")).toBe(true)
       expect(providers.contains("google")).toBe(false)
-    })
-  })
-
-  describe("model lists", () => {
-    it("should have known models for direct providers as Lists", () => {
-      expect(KNOWN_DIRECT_MODELS.openai.contains("gpt-4o")).toBe(true)
-      expect(KNOWN_DIRECT_MODELS.anthropic.contains("claude-sonnet-4-20250514")).toBe(true)
-      expect(KNOWN_DIRECT_MODELS.google.contains("gemini-2.5-pro")).toBe(true)
-      expect(KNOWN_DIRECT_MODELS.mistral.contains("mistral-large-latest")).toBe(true)
-    })
-
-    it("should have sample OpenRouter models as List", () => {
-      expect(SAMPLE_OPENROUTER_MODELS.size).toBeGreaterThan(0)
-      expect(SAMPLE_OPENROUTER_MODELS.contains("openai/gpt-4o")).toBe(true)
     })
   })
 })

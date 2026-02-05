@@ -5,6 +5,45 @@
 
 import type { List } from "functype"
 
+// ============================================================================
+// OpenRouter Model Types
+// ============================================================================
+
+/**
+ * A model from OpenRouter's API
+ */
+export type OpenRouterModel = {
+  readonly id: string
+  readonly name: string
+  readonly description?: string
+  readonly contextLength: number
+  readonly pricing: {
+    readonly prompt: string
+    readonly completion: string
+  }
+  readonly provider: string
+}
+
+/**
+ * Options for searching OpenRouter models
+ */
+export type SearchModelsOptions = {
+  readonly query?: string
+  readonly provider?: string
+  readonly maxPrice?: number
+  readonly freeOnly?: boolean
+  readonly limit?: number
+}
+
+/**
+ * Result of a model search
+ */
+export type SearchModelsResult = {
+  readonly models: List<OpenRouterModel>
+  readonly query?: string
+  readonly totalMatches: number
+}
+
 /**
  * Result of a single model query
  */
@@ -101,14 +140,6 @@ export type CritiqueResult = {
 export type ProviderType = "openrouter" | "openai" | "anthropic" | "google" | "mistral"
 
 /**
- * Provider configuration status
- */
-export type ProviderStatus = {
-  readonly configured: boolean
-  readonly models: List<string>
-}
-
-/**
  * Health check result for a provider
  */
 export type ProviderHealth = {
@@ -116,17 +147,6 @@ export type ProviderHealth = {
   readonly status: "healthy" | "unhealthy" | "unconfigured"
   readonly latencyMs?: number
   readonly error?: string
-}
-
-/**
- * Result of list_models tool
- */
-export type ListModelsResult = {
-  readonly directProviders: Record<ProviderType, ProviderStatus>
-  readonly openrouter: {
-    readonly configured: boolean
-    readonly note: string
-  }
 }
 
 /**

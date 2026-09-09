@@ -109,11 +109,10 @@ server.addTool({
   execute: (): Promise<string> => {
     const providers = getConfiguredProviders()
 
-    const healthResults: List<ProviderHealth> = providers.map(
-      (provider): ProviderHealth =>
-        isProviderConfigured(provider)
-          ? { provider, status: "healthy", latencyMs: 0 }
-          : { provider, status: "unconfigured" },
+    const healthResults: List<ProviderHealth> = providers.map((provider): ProviderHealth =>
+      isProviderConfigured(provider)
+        ? { provider, status: "healthy", latencyMs: 0 }
+        : { provider, status: "unconfigured" },
     )
 
     const healthyCount = healthResults.filter((h) => h.status === "healthy").size

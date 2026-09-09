@@ -284,5 +284,5 @@ export const queryModels = async (
   return { responses, errors }
 }
 
-export { getConfiguredProviders, isProviderConfigured } from "./config.js"
+export { ALL_PROVIDERS, getConfiguredProviders, isProviderConfigured } from "./config.js"
 export { searchModels } from "./openrouter-models.js"

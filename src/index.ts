@@ -22,6 +22,7 @@ import {
   SERVER_VERSION,
 } from "./constants.js"
 import {
+  ALL_PROVIDERS,
   getConfiguredProviders,
   isProviderConfigured,
   queryModel,
@@ -161,13 +162,12 @@ server.addTool({
   execute: (): Promise<string> => {
     const providers = getConfiguredProviders()
     const result = {
-      providers: {
-        openrouter: { configured: isProviderConfigured("openrouter") },
-        openai: { configured: isProviderConfigured("openai") },
-        anthropic: { configured: isProviderConfigured("anthropic") },
-        google: { configured: isProviderConfigured("google") },
-        mistral: { configured: isProviderConfigured("mistral") },
-      },
+      // Derived from ALL_PROVIDERS rather than hardcoded, so a newly added
+      // provider can never count toward configuredCount while being invisible
+      // in this map — which is exactly what happened when azure was added.
+      providers: Object.fromEntries(
+        ALL_PROVIDERS.toArray().map((provider) => [provider, { configured: isProviderConfigured(provider) }]),
+      ),
       configuredCount: providers.size,
       note: "Use search_models to find specific models on OpenRouter",
     }

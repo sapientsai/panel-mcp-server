@@ -42,6 +42,7 @@ The calling LLM can optionally include its own position when using panel tools v
    - `openai/gpt-5.6-sol` - calls OpenAI API directly
    - `anthropic/claude-sonnet-5` - calls Anthropic API directly
    - `google/gemini-3.1-pro-preview` - calls Google API directly
+   - `azure/gpt-6-astra` - calls your Azure OpenAI / Microsoft Foundry resource
 
 **Default Panel**: GPT-5.6 Sol + Claude Sonnet 5 + Gemini 3.1 Pro (preview)
 

@@ -30,6 +30,7 @@ type ProviderInstances = {
   anthropic?: ReturnType<typeof createAnthropic>
   google?: ReturnType<typeof createGoogleGenerativeAI>
   mistral?: ReturnType<typeof createMistral>
+  azure?: ReturnType<typeof createOpenAI>
 }
 
 const providers: ProviderInstances = {}
@@ -90,6 +91,22 @@ const getMistralProvider = (): Option<ReturnType<typeof createMistral>> => {
 }
 
 /**
+ * Get or create Azure OpenAI provider
+ *
+ * Azure's v1 endpoint is OpenAI-compatible, so no Azure-specific SDK is needed:
+ * the standard OpenAI client pointed at the resource URL is the documented
+ * approach. AZURE_BASE_URL must end in /openai/v1/.
+ */
+const getAzureProvider = (): Option<ReturnType<typeof createOpenAI>> => {
+  if (!isProviderConfigured("azure")) return Option.none()
+  providers.azure ??= createOpenAI({
+    baseURL: process.env[ENV_KEYS.AZURE_BASE_URL],
+    apiKey: process.env[ENV_KEYS.AZURE_API_KEY],
+  })
+  return Option(providers.azure)
+}
+
+/**
  * Parsed model information
  */
 type ParsedModel = {
@@ -104,6 +121,7 @@ type ParsedModel = {
  * - "openrouter/anthropic/claude-sonnet-5" -> { provider: "openrouter", model: "anthropic/claude-sonnet-5" }
  * - "openai/gpt-5.6-sol" -> { provider: "openai", model: "gpt-5.6-sol" }
  * - "anthropic/claude-sonnet-5" -> { provider: "anthropic", model: "claude-sonnet-5" }
+ * - "azure/gpt-6-astra" -> { provider: "azure", model: "gpt-6-astra" } (deployment name)
  */
 const parseModelString = (modelString: string): Either<string, ParsedModel> => {
   // Check for openrouter/ prefix first (it contains nested provider)
@@ -178,6 +196,16 @@ export const resolveModel = (modelString: string): Either<string, LanguageModel>
         getModelWithFallback(getMistralProvider(), (mistral) => mistral(model), `mistralai/${model}`).toEither(
           "Mistral API key not configured. Set MISTRAL_API_KEY or OPENROUTER_API_KEY.",
         ),
+      )
+      // No OpenRouter fallback here on purpose. Asking for azure/ means "bill my
+      // Azure resource"; silently rerouting would spend on a different account.
+      .case("azure", () =>
+        getAzureProvider()
+          .map((azure) => azure(model) as LanguageModel)
+          .toEither(
+            "Azure not configured. Set AZURE_API_KEY and AZURE_BASE_URL " +
+              "(the resource URL ending in /openai/v1/). Note the model must be a deployment name.",
+          ),
       )
       .exhaustive(),
   )

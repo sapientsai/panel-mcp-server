@@ -101,9 +101,9 @@ type ParsedModel = {
  * Parse a model string to determine provider and model name
  *
  * Examples:
- * - "openrouter/anthropic/claude-sonnet-4" -> { provider: "openrouter", model: "anthropic/claude-sonnet-4" }
- * - "openai/gpt-4o" -> { provider: "openai", model: "gpt-4o" }
- * - "anthropic/claude-sonnet-4-20250514" -> { provider: "anthropic", model: "claude-sonnet-4-20250514" }
+ * - "openrouter/anthropic/claude-sonnet-5" -> { provider: "openrouter", model: "anthropic/claude-sonnet-5" }
+ * - "openai/gpt-5.6-sol" -> { provider: "openai", model: "gpt-5.6-sol" }
+ * - "anthropic/claude-sonnet-5" -> { provider: "anthropic", model: "claude-sonnet-5" }
  */
 const parseModelString = (modelString: string): Either<string, ParsedModel> => {
   // Check for openrouter/ prefix first (it contains nested provider)
@@ -129,7 +129,9 @@ const parseModelString = (modelString: string): Either<string, ParsedModel> => {
       // Default to openrouter if no prefix and openrouter is configured
       isProviderConfigured("openrouter")
         ? Right({ provider: "openrouter" as ProviderType, model: modelString })
-        : Left(`Cannot determine provider for model: ${modelString}. Use a provider prefix (e.g., openai/gpt-4o).`),
+        : Left(
+            `Cannot determine provider for model: ${modelString}. Use a provider prefix (e.g., openai/gpt-5.6-sol).`,
+          ),
     )
 }
 

@@ -104,7 +104,7 @@ GOOGLE_GENERATIVE_AI_API_KEY=...
 MISTRAL_API_KEY=...
 
 # Configuration
-PANEL_DEFAULT_MODELS=openai/gpt-4o,anthropic/claude-sonnet-4-20250514,google/gemini-2.5-pro
+PANEL_DEFAULT_MODELS=openai/gpt-5.6-sol,anthropic/claude-sonnet-5,google/gemini-3.1-pro-preview
 PANEL_MAX_CONCURRENT=5
 PANEL_REQUEST_TIMEOUT_MS=60000
 ```

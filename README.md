@@ -34,16 +34,16 @@ The calling LLM can optionally include its own position when using panel tools v
 ### Dual-Mode Provider System
 
 1. **OpenRouter mode** (recommended): Use `openrouter/` prefix for any of 300+ models
-   - `openrouter/anthropic/claude-sonnet-4`
-   - `openrouter/openai/gpt-4o`
+   - `openrouter/anthropic/claude-sonnet-5`
+   - `openrouter/openai/gpt-5.6-sol`
    - `openrouter/meta-llama/llama-3.3-70b-instruct`
 
 2. **Direct mode**: Use provider prefix for direct API calls (lower latency, no fee)
-   - `openai/gpt-4o` - calls OpenAI API directly
-   - `anthropic/claude-sonnet-4-20250514` - calls Anthropic API directly
-   - `google/gemini-2.5-pro` - calls Google API directly
+   - `openai/gpt-5.6-sol` - calls OpenAI API directly
+   - `anthropic/claude-sonnet-5` - calls Anthropic API directly
+   - `google/gemini-3.1-pro-preview` - calls Google API directly
 
-**Default Panel**: GPT-4o + Claude Sonnet 4 + Gemini 2.5 Pro
+**Default Panel**: GPT-5.6 Sol + Claude Sonnet 5 + Gemini 3.1 Pro (preview)
 
 ## Installation
 
@@ -68,7 +68,7 @@ export GOOGLE_GENERATIVE_AI_API_KEY=...
 export MISTRAL_API_KEY=...
 
 # Optional configuration
-export PANEL_DEFAULT_MODELS=gpt-4o,claude-sonnet-4-20250514,gemini-2.5-pro
+export PANEL_DEFAULT_MODELS=openai/gpt-5.6-sol,anthropic/claude-sonnet-5,google/gemini-3.1-pro-preview
 export PANEL_MAX_CONCURRENT=5
 export PANEL_REQUEST_TIMEOUT_MS=60000
 ```

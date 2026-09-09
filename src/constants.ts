@@ -13,13 +13,15 @@ import { FALLBACK_FREE_MODELS, getFreeModels } from "./providers/openrouter-mode
  * Default panel of models for council queries.
  * Balanced selection of capability, cost, and provider diversity.
  *
+ * Note: gemini-3.1-pro-preview is a preview model — Google has no GA 3.x Pro yet.
+ *
  * Override: PANEL_DEFAULT_MODELS (comma-separated list)
  * Use "free" as a special value to dynamically fetch free OpenRouter models.
  */
 export const DEFAULT_PANEL_MODELS = List.of(
-  "openai/gpt-4o",
-  "anthropic/claude-sonnet-4-20250514",
-  "google/gemini-2.5-pro",
+  "openai/gpt-5.6-sol",
+  "anthropic/claude-sonnet-5",
+  "google/gemini-3.1-pro-preview",
 )
 
 /**
@@ -102,6 +104,7 @@ export const isUsingFreeModels = (): boolean =>
  */
 export const getDefaultModels = (): List<string> =>
   Option(process.env[ENV_KEYS.DEFAULT_MODELS])
+    .filter((envModels) => envModels.trim().length > 0)
     .map((envModels) => {
       const trimmed = envModels.trim().toLowerCase()
       // Special "free" keyword returns fallback free models synchronously
@@ -124,7 +127,7 @@ export const getDefaultModels = (): List<string> =>
 export const getDefaultModelsAsync = async (): Promise<List<string>> => {
   const envModels = process.env[ENV_KEYS.DEFAULT_MODELS]
 
-  if (!envModels) {
+  if (!envModels || envModels.trim().length === 0) {
     return DEFAULT_PANEL_MODELS
   }
 

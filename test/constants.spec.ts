@@ -8,6 +8,7 @@ import {
   SERVER_NAME,
   SERVER_VERSION,
   getDefaultModels,
+  getDefaultModelsAsync,
   getMaxConcurrent,
   getRequestTimeout,
 } from "../src/constants"
@@ -16,9 +17,9 @@ describe("constants", () => {
   describe("default values", () => {
     it("should have default panel models as List", () => {
       expect(DEFAULT_PANEL_MODELS.size).toBe(3)
-      expect(DEFAULT_PANEL_MODELS.contains("openai/gpt-4o")).toBe(true)
-      expect(DEFAULT_PANEL_MODELS.contains("anthropic/claude-sonnet-4-20250514")).toBe(true)
-      expect(DEFAULT_PANEL_MODELS.contains("google/gemini-2.5-pro")).toBe(true)
+      expect(DEFAULT_PANEL_MODELS.contains("openai/gpt-5.6-sol")).toBe(true)
+      expect(DEFAULT_PANEL_MODELS.contains("anthropic/claude-sonnet-5")).toBe(true)
+      expect(DEFAULT_PANEL_MODELS.contains("google/gemini-3.1-pro-preview")).toBe(true)
     })
 
     it("should have sensible defaults", () => {
@@ -54,6 +55,25 @@ describe("constants", () => {
       process.env.PANEL_DEFAULT_MODELS = "openai/gpt-4,anthropic/claude-3"
       const models = getDefaultModels()
       expect(models.toArray()).toEqual(["openai/gpt-4", "anthropic/claude-3"])
+    })
+
+    it("should return default models when env is an empty string", () => {
+      process.env.PANEL_DEFAULT_MODELS = ""
+      const models = getDefaultModels()
+      expect(models.toArray()).toEqual(DEFAULT_PANEL_MODELS.toArray())
+    })
+
+    it("should return default models when env is whitespace only", () => {
+      process.env.PANEL_DEFAULT_MODELS = "   "
+      const models = getDefaultModels()
+      expect(models.toArray()).toEqual(DEFAULT_PANEL_MODELS.toArray())
+    })
+
+    it("should agree with the async variant on empty and whitespace values", async () => {
+      for (const value of ["", "   "]) {
+        process.env.PANEL_DEFAULT_MODELS = value
+        expect(getDefaultModels().toArray()).toEqual((await getDefaultModelsAsync()).toArray())
+      }
     })
   })
 

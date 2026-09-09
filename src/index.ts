@@ -235,7 +235,7 @@ server.addTool({
     model: z
       .string()
       .describe(
-        "Model identifier (e.g., 'openai/gpt-4o', 'anthropic/claude-sonnet-4-20250514', 'openrouter/meta-llama/llama-3.3-70b-instruct')",
+        "Model identifier (e.g., 'openai/gpt-5.6-sol', 'anthropic/claude-sonnet-5', 'openrouter/meta-llama/llama-3.3-70b-instruct')",
       ),
     systemPrompt: z.string().optional().describe("Optional system prompt for context"),
   }),

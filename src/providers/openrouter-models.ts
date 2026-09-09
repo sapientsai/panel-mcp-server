@@ -62,25 +62,21 @@ export const fetchOpenRouterModels = async (): Promise<List<OpenRouterModel>> =>
   const models = result.fold(
     () => List.empty<OpenRouterModel>(),
     (data) =>
-      List(data).map(
-        (m): OpenRouterModel => ({
-          id: m.id,
-          name: m.name ?? m.id,
-          description: m.description,
-          contextLength: m.context_length ?? 0,
-          pricing: {
-            prompt: m.pricing?.prompt ?? "0",
-            completion: m.pricing?.completion ?? "0",
-          },
-          provider: m.id.split("/")[0] ?? "unknown",
-        }),
-      ),
+      List(data).map((m): OpenRouterModel => ({
+        id: m.id,
+        name: m.name ?? m.id,
+        description: m.description,
+        contextLength: m.context_length ?? 0,
+        pricing: {
+          prompt: m.pricing?.prompt ?? "0",
+          completion: m.pricing?.completion ?? "0",
+        },
+        provider: m.id.split("/")[0] ?? "unknown",
+      })),
   )
 
   // Update cache (using object mutation pattern)
-  // eslint-disable-next-line functional/immutable-data
   cache.models = models
-  // eslint-disable-next-line functional/immutable-data
   cache.timestamp = Date.now()
 
   return models
@@ -149,9 +145,7 @@ export const getCachedFreeModels = (): Promise<List<string>> => {
  * Clear cache (useful for testing)
  */
 export const clearModelCache = (): void => {
-  // eslint-disable-next-line functional/immutable-data
   cache.models = null
-  // eslint-disable-next-line functional/immutable-data
   cache.timestamp = 0
 }
 

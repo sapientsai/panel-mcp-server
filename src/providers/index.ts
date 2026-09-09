@@ -120,12 +120,10 @@ const parseModelString = (modelString: string): Either<string, ParsedModel> => {
   const matchedEntry = providerEntries.find(([, prefix]) => modelString.startsWith(prefix))
 
   return Option(matchedEntry)
-    .map(
-      ([provider, prefix]): ParsedModel => ({
-        provider: provider as ProviderType,
-        model: modelString.slice(prefix.length),
-      }),
-    )
+    .map(([provider, prefix]): ParsedModel => ({
+      provider: provider as ProviderType,
+      model: modelString.slice(prefix.length),
+    }))
     .map((parsed): Either<string, ParsedModel> => Right(parsed))
     .orElse(
       // Default to openrouter if no prefix and openrouter is configured
@@ -229,8 +227,7 @@ export const queryModel = async (modelString: string, prompt: string, systemProm
       // Extract actual model/provider from OpenRouter's metadata if available
       const openrouterMeta = response.providerMetadata?.openrouter as Record<string, unknown> | undefined
       const actualModel = (openrouterMeta?.model ?? openrouterMeta?.provider ?? openrouterMeta?.id) as
-        | string
-        | undefined
+        string | undefined
       return {
         model: modelString,
         ...(actualModel && { actualModel }),

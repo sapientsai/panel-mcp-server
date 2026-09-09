@@ -66,6 +66,7 @@ export const PROVIDER_PREFIXES = {
   anthropic: "anthropic/",
   google: "google/",
   mistral: "mistral/",
+  azure: "azure/",
 } as const
 
 /**
@@ -77,6 +78,12 @@ export const ENV_KEYS = {
   ANTHROPIC_API_KEY: "ANTHROPIC_API_KEY",
   GOOGLE_API_KEY: "GOOGLE_GENERATIVE_AI_API_KEY",
   MISTRAL_API_KEY: "MISTRAL_API_KEY",
+  // Azure OpenAI / Microsoft Foundry. The v1 endpoint is OpenAI-compatible, so
+  // it is reached with the standard OpenAI client pointed at the resource URL.
+  // AZURE_BASE_URL must end in /openai/v1/ and model strings are *deployment
+  // names*, not model ids (e.g. "azure/gpt-6-astra" -> deployment "gpt-6-astra").
+  AZURE_API_KEY: "AZURE_API_KEY",
+  AZURE_BASE_URL: "AZURE_BASE_URL",
   DEFAULT_MODELS: "PANEL_DEFAULT_MODELS",
   MAX_CONCURRENT: "PANEL_MAX_CONCURRENT",
   REQUEST_TIMEOUT: "PANEL_REQUEST_TIMEOUT_MS",

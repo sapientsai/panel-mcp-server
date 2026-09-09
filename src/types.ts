@@ -137,7 +137,7 @@ export type CritiqueResult = {
 /**
  * Provider type for model resolution
  */
-export type ProviderType = "openrouter" | "openai" | "anthropic" | "google" | "mistral"
+export type ProviderType = "openrouter" | "openai" | "anthropic" | "google" | "mistral" | "azure"
 
 /**
  * Health check result for a provider

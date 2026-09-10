@@ -12,10 +12,10 @@
   ],
   "author": "jordan.burke@gmail.com",
   "license": "MIT",
-  "homepage": "https://github.com/jordanburke/panel-mcp-server",
+  "homepage": "https://github.com/sapientsai/panel-mcp-server",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jordanburke/panel-mcp-server"
+    "url": "https://github.com/sapientsai/panel-mcp-server"
   },
   "bin": {
     "panel-mcp-server": "./dist/index.js"

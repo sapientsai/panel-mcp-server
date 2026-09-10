@@ -91,6 +91,18 @@ The codebase uses functype for functional programming:
 | `debate`        | Run adversarial debate between two models |
 | `critique`      | Get structured critique of a response     |
 
+### Review rounds are stateless by design
+
+`critique` and `challenge` take an optional `priorFindings` array. The tools hold
+no session state: the models behind them have no memory, so a server-side
+session would only replay accumulated context on every call while moving the
+"what still matters" judgement away from the calling LLM, which holds the full
+conversation. The caller hands back the previous round's findings instead.
+
+Reviewers are then told to check whether each prior finding is resolved rather
+than repeat it, so a second round reports what remains plus anything the
+revision introduced. See `src/prior-findings.ts`.
+
 ## Environment Variables
 
 ```bash

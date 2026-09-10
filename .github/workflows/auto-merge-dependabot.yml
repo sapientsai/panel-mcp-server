@@ -1,0 +1,40 @@
+name: Auto-merge Dependabot PRs
+
+# Queues patch/minor Dependabot PRs to merge once "Node.js CI" passes.
+# Majors are left alone for manual review.
+#
+# Requires "Allow auto-merge" enabled on the repository, otherwise
+# `gh pr merge --auto` fails.
+#
+# Note: there is deliberately no "approve" step here. This repo has
+# can_approve_pull_request_reviews=false, so GITHUB_TOKEN cannot approve a PR
+# and such a step fails every run. Auto-merge does not need an approval while
+# main is unprotected.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Enable auto-merge for patch and minor updates
+        if: |
+          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

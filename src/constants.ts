@@ -34,11 +34,17 @@ export const DEFAULT_MAX_CONCURRENT = 5
 
 /**
  * Request timeout in milliseconds.
- * Long enough for complex queries, short enough to fail fast.
+ *
+ * Sized for frontier reasoning models, which are far slower than chat models
+ * and highly variable. Measured on gpt-6-astra for a five-token reply:
+ * 3.9s / 4.8s / 10.7s / 13.1s / 26.7s / 62.6s / 122.8s — roughly 30x spread on
+ * near-identical prompts. The previous 60s default cut off responses the model
+ * was about to return, which surfaces as a timeout error rather than a slow
+ * answer. 300s leaves ~2.5x headroom over the slowest observed run.
  *
  * Override: PANEL_REQUEST_TIMEOUT_MS
  */
-export const DEFAULT_REQUEST_TIMEOUT_MS = 60_000
+export const DEFAULT_REQUEST_TIMEOUT_MS = 300_000
 
 /**
  * Maximum debate rounds allowed.

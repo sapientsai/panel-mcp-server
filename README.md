@@ -71,7 +71,7 @@ export MISTRAL_API_KEY=...
 # Optional configuration
 export PANEL_DEFAULT_MODELS=openai/gpt-5.6-sol,anthropic/claude-sonnet-5,google/gemini-3.1-pro-preview
 export PANEL_MAX_CONCURRENT=5
-export PANEL_REQUEST_TIMEOUT_MS=60000
+export PANEL_REQUEST_TIMEOUT_MS=300000
 ```
 
 ## Usage

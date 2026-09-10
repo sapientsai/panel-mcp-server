@@ -24,7 +24,7 @@ describe("constants", () => {
 
     it("should have sensible defaults", () => {
       expect(DEFAULT_MAX_CONCURRENT).toBe(5)
-      expect(DEFAULT_REQUEST_TIMEOUT_MS).toBe(60_000)
+      expect(DEFAULT_REQUEST_TIMEOUT_MS).toBe(300_000)
     })
 
     it("should have server metadata", () => {

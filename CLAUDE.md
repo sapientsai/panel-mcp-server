@@ -111,7 +111,7 @@ AZURE_BASE_URL=https://YOUR-RESOURCE.openai.azure.com/openai/v1/
 # Configuration
 PANEL_DEFAULT_MODELS=openai/gpt-5.6-sol,anthropic/claude-sonnet-5,google/gemini-3.1-pro-preview
 PANEL_MAX_CONCURRENT=5
-PANEL_REQUEST_TIMEOUT_MS=60000
+PANEL_REQUEST_TIMEOUT_MS=300000
 ```
 
 ## Testing

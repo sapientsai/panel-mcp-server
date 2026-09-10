@@ -21,6 +21,7 @@ import {
   SERVER_NAME,
   SERVER_VERSION,
 } from "./constants.js"
+import { PRIOR_FINDINGS_SCHEMA, renderPriorFindings } from "./prior-findings.js"
 import {
   ALL_PROVIDERS,
   getConfiguredProviders,
@@ -428,7 +429,7 @@ server.addTool({
 server.addTool({
   name: "critique",
   description:
-    "Have a model critique a response. Returns structured feedback with strengths, weaknesses, and suggestions. Use to get a second opinion or improve a response.",
+    "Have a model critique a response. Returns structured feedback with strengths, weaknesses, and suggestions. Use to get a second opinion or improve a response. For a follow-up round on a revised draft, pass priorFindings so the reviewer checks whether they were resolved instead of repeating them.",
   parameters: z.object({
     originalPrompt: z.string().describe("The original prompt that generated the response"),
     response: z.string().describe("The response to critique (from another model or user-provided)"),
@@ -442,6 +443,7 @@ server.addTool({
       .array(z.string())
       .optional()
       .describe("Specific aspects to focus on (e.g., ['accuracy', 'completeness', 'clarity'])"),
+    priorFindings: PRIOR_FINDINGS_SCHEMA,
   }),
   execute: async (args): Promise<string> => {
     const defaultModels = await getDefaultModelsAsync()
@@ -450,6 +452,7 @@ server.addTool({
       .filter((a) => a.length > 0)
       .map((aspects) => `\n\nFocus particularly on these aspects: ${aspects.join(", ")}`)
       .orElse("")
+    const priorClause = renderPriorFindings(Option(args.priorFindings))
 
     const critiquePrompt = `You are a critical reviewer. Analyze the following response to a prompt and provide structured feedback.
 
@@ -458,7 +461,7 @@ Original prompt:
 
 Response to critique:
 "${args.response}"
-${aspectsClause}
+${aspectsClause}${priorClause}
 
 Provide your critique in the following JSON format:
 {
@@ -524,7 +527,7 @@ Respond ONLY with the JSON object, no additional text.`
 server.addTool({
   name: "challenge",
   description:
-    "Have multiple models find weaknesses in a proposed thought. Returns structured challenges to help strengthen the reasoning. Use for adversarial stress-testing of ideas.",
+    "Have multiple models find weaknesses in a proposed thought. Returns structured challenges to help strengthen the reasoning. Use for adversarial stress-testing of ideas. For a follow-up round on a revised draft, pass priorFindings so challengers verify whether they were resolved instead of repeating them.",
   parameters: z.object({
     proposedThought: z.string().describe("The thought/claim to challenge"),
     context: z.string().optional().describe("Additional context about the thought"),
@@ -538,6 +541,7 @@ server.addTool({
       .array(z.enum(["logical", "factual", "completeness", "edge_cases", "alternatives"]))
       .optional()
       .describe("Types of challenges to focus on. Defaults to all types."),
+    priorFindings: PRIOR_FINDINGS_SCHEMA,
   }),
   execute: async (args): Promise<string> => {
     const challengers = args.challengers ? List(args.challengers) : await getDefaultChallengerModelsAsync()
@@ -549,11 +553,12 @@ server.addTool({
     const contextClause = Option(args.context)
       .map((ctx) => `\n\nAdditional context:\n${ctx}`)
       .orElse("")
+    const priorClause = renderPriorFindings(Option(args.priorFindings))
 
     const challengePrompt = `You are a critical analyst tasked with finding weaknesses in an argument or position. Your goal is to help strengthen the reasoning by identifying genuine issues.
 
 Position to analyze:
-"${args.proposedThought}"${contextClause}
+"${args.proposedThought}"${contextClause}${priorClause}
 
 Focus on these types of challenges: ${challengeTypes.join(", ")}
 

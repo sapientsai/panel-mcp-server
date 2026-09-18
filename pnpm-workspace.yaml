@@ -1,0 +1,11 @@
+allowBuilds:
+  esbuild: true
+  tldjs: true
+
+publicHoistPattern:
+  - "*eslint*"
+  - "*prettier*"
+  - "*vitest*"
+  - "typescript"
+  - "*rimraf*"
+  - "*cross-env*"

@@ -42,7 +42,7 @@
     "@ai-sdk/openai": "^4.0.62",
     "@openrouter/ai-sdk-provider": "^3.0.0",
     "ai": "^7.0.94",
-    "commander": "^14.0.3",
+    "commander": "^15.0.0",
     "fastmcp": "^4.20.6",
     "functype": "^1.9.0",
     "zod": "^4.5.4"

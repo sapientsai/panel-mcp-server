@@ -10,28 +10,28 @@ importers:
     dependencies:
       '@ai-sdk/anthropic':
         specifier: ^4.0.50
-        version: 4.0.57(zod@4.6.5)
+        version: 4.0.63(zod@4.6.5)
       '@ai-sdk/google':
         specifier: ^4.0.65
-        version: 4.0.75(zod@4.6.5)
+        version: 4.0.80(zod@4.6.5)
       '@ai-sdk/mistral':
         specifier: ^4.0.40
-        version: 4.0.47(zod@4.6.5)
+        version: 4.0.50(zod@4.6.5)
       '@ai-sdk/openai':
         specifier: ^4.0.62
-        version: 4.0.70(zod@4.6.5)
+        version: 4.0.75(zod@4.6.5)
       '@openrouter/ai-sdk-provider':
         specifier: ^3.0.0
-        version: 3.0.0(ai@7.0.106(zod@4.6.5))(zod@4.6.5)
+        version: 3.1.0(ai@7.0.114(zod@4.6.5))(zod@4.6.5)
       ai:
         specifier: ^7.0.94
-        version: 7.0.106(zod@4.6.5)
+        version: 7.0.114(zod@4.6.5)
       commander:
         specifier: ^14.0.3
         version: 14.0.3
       fastmcp:
         specifier: ^4.20.6
-        version: 4.20.14(ajv-formats@3.0.1(ajv@8.20.0))(ajv@8.20.0)(jose@6.2.12)(openapi-types@12.1.3)(supports-color@7.2.0)
+        version: 4.21.2(ajv-formats@3.0.1(ajv@8.20.0))(ajv@8.20.0)(jose@6.2.12)(openapi-types@12.1.3)(supports-color@7.2.0)
       functype:
         specifier: ^1.9.0
         version: 1.9.0
@@ -50,56 +50,58 @@ importers:
         version: 6.1.3
       ts-builds:
         specifier: ^3.4.1
-        version: 3.4.1(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@typescript-eslint/eslint-plugin@8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(supports-color@7.2.0)(tsdown@0.23.0(typescript@6.0.3)(unrun@0.2.39(synckit@0.11.13)))(vite@8.3.0(@types/node@24.13.3)(esbuild@0.27.7))
+        version: 3.4.3(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@typescript-eslint/eslint-plugin@8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(supports-color@7.2.0)(tsdown@0.23.0(typescript@6.0.3)(unrun@0.2.39(synckit@0.11.13)))(vite@8.3.0(@types/node@24.13.3)(esbuild@0.27.7))
       tsdown:
         specifier: ^0.23.0
         version: 0.23.0(typescript@6.0.3)(unrun@0.2.39(synckit@0.11.13))
 
 packages:
 
-  '@ai-sdk/anthropic@4.0.57':
-    resolution: {integrity: sha512-alc6hlZVlaXvu7WrRcCGP5LLuJhnx6xryaKAWpzLPtAB4ZNxDkcSBDqgnO2uTNhwxG8gAEG3P4aTrPy3oH2GnA==}
+  '@ai-sdk/anthropic@4.0.63':
+    resolution: {integrity: sha512-DuhaMr18pIvTLOd8sNm+kc1T/Uh0lv3prNKhgFMp0yXEnLy1MeHdoiokaimwHINPqI/9JzAiHZO/rq19L7iRQA==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/gateway@4.0.86':
-    resolution: {integrity: sha512-sPqb9+Uparn18A7zf6GDXXIx/+tsdA7V43NyL+HaHMBl7wrFaO9fBEf4/FoiKn1D/zv0Cc3PgpJX9JsuG7MKeg==}
+  '@ai-sdk/gateway@4.0.92':
+    resolution: {integrity: sha512-awX24+QedfcIDTAdwkCUNG08vPJjkQI9KZLGh4Ua+vNbgeaNFJre96OIbBefOD9XPHSVpdXjwqtWmo4Yh7oczw==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google@4.0.75':
-    resolution: {integrity: sha512-OhPsdbZwep3jlb8iaoB5FVxzsnTXqcHs+Gec2HmBLKttZNpdZErC8UKp8PcSQw2sXrI9g+ChkrGsMF0siklb9A==}
+  '@ai-sdk/google@4.0.80':
+    resolution: {integrity: sha512-UIsUZwt5qaPeuhjYMz7EUYUk8iATuf6LvClyVvK2x17fiaDSOk+AhH4JCLsvOxjzH2JPKfZ3TR8NR0so0tlmcQ==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/mistral@4.0.47':
-    resolution: {integrity: sha512-lhR+Yd/n1UAzRuRUoKrrBl8OoTAPuMabB5NRPThdf+hPF56Ny7iMvbitAU4rLqXoQkQ0I1+VftQZWaBLMu2SLA==}
+  '@ai-sdk/mistral@4.0.50':
+    resolution: {integrity: sha512-SXs9HYtOn5P4911FXF/Dp3+WYCFQJtZctowrUhSCQtdHWygqCafUWl3SoTZQJH2DO31Gb8iGzHUa42u3e3lq8w==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@4.0.70':
-    resolution: {integrity: sha512-D2JjGOPnn67HYqMn/22/xtel0Gdz/0jSwe6Ig7HMa0piGmAekBfg71vAmFwx3GN9PZPKB+JUIpuzTASRLUBVKw==}
+  '@ai-sdk/openai@4.0.75':
+    resolution: {integrity: sha512-CMGKG95Q9gnycHr++W2z2JCizhRvIbvR/sKaZvxinnzpAS2UJeiL74DEAV8eNDJCZ3XWyeOvlKn9vZP3jqrv4g==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider-utils@5.0.44':
-    resolution: {integrity: sha512-TZGr0Al1mMnRh7Wd+3qTnSdWvBDIst2Abl8mglkob8rbXF1TG5xoeVLV19rD/AtB+NL/LUPITdbQ0EFGHRBcSw==}
+  '@ai-sdk/provider-utils@5.0.47':
+    resolution: {integrity: sha512-NZQ1hMxY6Hd4ZiinjpU5HUOsyCHiTFkHw7AiM1EVN+Cd3kNTi47flZWNvFwGqnBojntB1+2eBRTeHRuVLtPhEg==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider@4.0.17':
-    resolution: {integrity: sha512-VYMBxIQdcHqbIf1j+YZlI9Ati6LZ4wJe0GGd4z4a5H/KxTggjeOiyaVYTnfF7LHZK5jMQ+rofmzz4QPqf++NUw==}
+  '@ai-sdk/provider@4.0.18':
+    resolution: {integrity: sha512-+GZJIgz1jk86pwEbb3f1BD2bdoSKyWE4Jg4YUc7NMnMozbWemSKYZcw2F4nMaO5qwsL5A8RmioAKW81YktRpIQ==}
     engines: {node: '>=22'}
 
-  '@apidevtools/json-schema-ref-parser@14.0.1':
-    resolution: {integrity: sha512-Oc96zvmxx1fqoSEdUmfmvvb59/KDOnUoJ7s2t7bISyAn0XEz57LCCw8k2Y4Pf3mwKaZLMciESALORLgfe2frCw==}
-    engines: {node: '>= 16'}
+  '@apidevtools/json-schema-ref-parser@16.0.3':
+    resolution: {integrity: sha512-7lZp4XCTZhU/AgiGpIG+j4uJeWPdGbpQ+8wqXrzuHy+tboKsjSacjGH9/kNThRDIFhMWHF3ba+ejS8J3PeSI1Q==}
+    engines: {node: '>=22.19.0'}
+    peerDependencies:
+      '@types/json-schema': ^7.0.15
 
   '@apidevtools/openapi-schemas@2.1.0':
     resolution: {integrity: sha512-Zc1AlqrJlX3SlpupFGpiLi2EbteyP7fXmUOGup6/DnkRgjP9bgMM/ag+n91rsv0U1Gpz0H3VILA/o3bW7Ua6BQ==}
@@ -108,8 +110,9 @@ packages:
   '@apidevtools/swagger-methods@3.0.2':
     resolution: {integrity: sha512-QAkD5kK2b1WfjDS/UQn/qQkbwF31uqRjPTrsCs5ZG9BQGAkjwvqGFjjPqAuzac/IYzpPtRzjCP1WrTuAIjMrXg==}
 
-  '@apidevtools/swagger-parser@12.1.0':
-    resolution: {integrity: sha512-e5mJoswsnAX0jG+J09xHFYQXb/bUc5S3pLpMxUuRUA2H8T2kni3yEoyz2R3Dltw5f4A6j6rPNMpWTK+iVDFlng==}
+  '@apidevtools/swagger-parser@13.1.0':
+    resolution: {integrity: sha512-dkCuqCWh5U7u0aurmmc/qvel2KeKDxHTwVtUdYonndIpD7mXV6AVaWNdvaja2HAy628z7FT/Qdz8sCgzwhgwKg==}
+    engines: {node: '>=22.19.0'}
     peerDependencies:
       openapi-types: '>=7'
 
@@ -435,8 +438,8 @@ packages:
       '@emnapi/core': ^1.7.1 || ^2.0.0-alpha.4
       '@emnapi/runtime': ^1.7.1 || ^2.0.0-alpha.4
 
-  '@openrouter/ai-sdk-provider@3.0.0':
-    resolution: {integrity: sha512-m9XTSWoODH2RM5OsZpaGiN7QRR8cdP5paBWq699Tu3JVmGPBKT8xF8XwV0ZBVVsjikD/JgWfak4VSsTR4wAVbg==}
+  '@openrouter/ai-sdk-provider@3.1.0':
+    resolution: {integrity: sha512-BQy1TA9fKrh47s9ivsO6FY5QimN7GUF0i8Qon3pkxQclEgShso0dClpcWn8OIyPLEZZPFaFKgI8TW4S/O0p0Dw==}
     engines: {node: '>=22'}
     peerDependencies:
       ai: ^7.0.0
@@ -979,8 +982,8 @@ packages:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
     engines: {node: '>= 6.0.0'}
 
-  ai@7.0.106:
-    resolution: {integrity: sha512-0W9AlZfyhOlPyE9ZXCFisg0uxxrmQMGdoVUz0ewRg5J+xAhVBomSspktqYeGWABFbQrYyWRVibnvSf24pTeE2w==}
+  ai@7.0.114:
+    resolution: {integrity: sha512-jRMOw7tPMWVYomoHWY5xHBXPQDyKTY1Pn3BX0Rh39UOP6y9FYq6xCIB6khgIC/b9CRg4+IxadwIbie+Eu7yU3g==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1396,8 +1399,8 @@ packages:
   fast-uri@3.1.7:
     resolution: {integrity: sha512-dOvZVzjdZdz7phd9v6jCbwxrBW3fK6n8Rc0CtdmM4bumzMnxywBYhuph6J819RRw/ku+rLbelwfMunktuzVVHg==}
 
-  fastmcp@4.20.14:
-    resolution: {integrity: sha512-Cbw0oIJdpOnbFEign0h44hAQ71HTvMbSeS3irR/WtArOiI8nkg4e6E/P1WDaSDJ/V2qpL/77FwCQmeM3z+jYYg==}
+  fastmcp@4.21.2:
+    resolution: {integrity: sha512-ycoWcjJs3yuQDPpRQXr9gca12BIHXON3ZMnJQUKrc7IGYu80kdVjo8eLdj6yYppH5/Q2Xhucgj7TLcQuSzgVhA==}
     hasBin: true
     peerDependencies:
       ajv: ^8.0.0
@@ -1682,6 +1685,10 @@ packages:
 
   js-yaml@4.3.2:
     resolution: {integrity: sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==}
+    hasBin: true
+
+  js-yaml@5.4.2:
+    resolution: {integrity: sha512-m+aqu+LwO1O6sIopafj8HUVl5aawITwZQe/yHpMCKjaWBaA/d07B/QdMb3529REftiU+RMMHL3Vlsw3hON7vWg==}
     hasBin: true
 
   json-schema-traverse@0.4.1:
@@ -1989,8 +1996,8 @@ packages:
     resolution: {integrity: sha512-SxToR7P8Y2lWmv/kTzVLC1t/GDI2WGjMwNhLLE9qtH8Q13C+aEmuRlzDst4Up4s0Wc8sF2M+J57iB3cMLqftfg==}
     engines: {node: '>=6.0.0'}
 
-  prettier@3.9.6:
-    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
+  prettier@3.9.9:
+    resolution: {integrity: sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -2229,13 +2236,13 @@ packages:
     peerDependencies:
       typescript: '>=4.8.4'
 
-  ts-builds@3.4.1:
-    resolution: {integrity: sha512-5lB37JIuPifbqoLpS4Z/Z74XiadVVRZZylqv54aySraFYr8uceLkwELJeehR81fodUNvO2MYtSEvR/xwh3mkuQ==}
+  ts-builds@3.4.3:
+    resolution: {integrity: sha512-VKAXMpfDd1j4YewezYdoiDUilAXnLIr7Nc+GKSsUZk2H45k1oXMO3bU8emsPxJrC2dZmPIt0M6MfOKxRAalgpQ==}
     engines: {node: '>=22'}
     hasBin: true
     peerDependencies:
       tsdown: ^0.x
-      vite: ^8.x
+      vite: ^7.x || ^8.x
     peerDependenciesMeta:
       tsdown:
         optional: true
@@ -2330,6 +2337,10 @@ packages:
   undici@7.29.1:
     resolution: {integrity: sha512-RYONW2MeafgYlkVOKYKkA/Ag7BmXqgIWCa8t1m0JcxrQg9pI9lEqRhAOruOBCbAohOa/gkCF+iPi9hrgvTzu6Q==}
     engines: {node: '>=20.18.1'}
+
+  undici@8.11.2:
+    resolution: {integrity: sha512-u4UB2/IrKdU6lFxumHmmo1a3fCQO5tzQllRorfoRS63txhrB7xTpSn1PftwC4qEHkOaqP95fCWW4lJzwErwzhQ==}
+    engines: {node: '>=22.19.0'}
 
   unicorn-magic@0.3.0:
     resolution: {integrity: sha512-+QBBXBCvifc56fsbuxZQ6Sic3wqqc3WWaqxs58gvJrcOuN83HGTCwz3oS5phzU9LthRNE9VrJCFCLUgHeeFnfA==}
@@ -2537,64 +2548,66 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/anthropic@4.0.57(zod@4.6.5)':
+  '@ai-sdk/anthropic@4.0.63(zod@4.6.5)':
     dependencies:
-      '@ai-sdk/provider': 4.0.17
-      '@ai-sdk/provider-utils': 5.0.44(zod@4.6.5)
+      '@ai-sdk/provider': 4.0.18
+      '@ai-sdk/provider-utils': 5.0.47(zod@4.6.5)
       zod: 4.6.5
 
-  '@ai-sdk/gateway@4.0.86(zod@4.6.5)':
+  '@ai-sdk/gateway@4.0.92(zod@4.6.5)':
     dependencies:
-      '@ai-sdk/provider': 4.0.17
-      '@ai-sdk/provider-utils': 5.0.44(zod@4.6.5)
+      '@ai-sdk/provider': 4.0.18
+      '@ai-sdk/provider-utils': 5.0.47(zod@4.6.5)
       '@vercel/oidc': 3.2.0
       zod: 4.6.5
 
-  '@ai-sdk/google@4.0.75(zod@4.6.5)':
+  '@ai-sdk/google@4.0.80(zod@4.6.5)':
     dependencies:
-      '@ai-sdk/provider': 4.0.17
-      '@ai-sdk/provider-utils': 5.0.44(zod@4.6.5)
+      '@ai-sdk/provider': 4.0.18
+      '@ai-sdk/provider-utils': 5.0.47(zod@4.6.5)
       zod: 4.6.5
 
-  '@ai-sdk/mistral@4.0.47(zod@4.6.5)':
+  '@ai-sdk/mistral@4.0.50(zod@4.6.5)':
     dependencies:
-      '@ai-sdk/provider': 4.0.17
-      '@ai-sdk/provider-utils': 5.0.44(zod@4.6.5)
+      '@ai-sdk/provider': 4.0.18
+      '@ai-sdk/provider-utils': 5.0.47(zod@4.6.5)
       zod: 4.6.5
 
-  '@ai-sdk/openai@4.0.70(zod@4.6.5)':
+  '@ai-sdk/openai@4.0.75(zod@4.6.5)':
     dependencies:
-      '@ai-sdk/provider': 4.0.17
-      '@ai-sdk/provider-utils': 5.0.44(zod@4.6.5)
+      '@ai-sdk/provider': 4.0.18
+      '@ai-sdk/provider-utils': 5.0.47(zod@4.6.5)
       zod: 4.6.5
 
-  '@ai-sdk/provider-utils@5.0.44(zod@4.6.5)':
+  '@ai-sdk/provider-utils@5.0.47(zod@4.6.5)':
     dependencies:
-      '@ai-sdk/provider': 4.0.17
+      '@ai-sdk/provider': 4.0.18
       '@standard-schema/spec': 1.1.0
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.1.1
       undici: 7.29.1
       zod: 4.6.5
 
-  '@ai-sdk/provider@4.0.17':
+  '@ai-sdk/provider@4.0.18':
     dependencies:
       json-schema: 0.4.0
 
-  '@apidevtools/json-schema-ref-parser@14.0.1':
+  '@apidevtools/json-schema-ref-parser@16.0.3(@types/json-schema@7.0.15)':
     dependencies:
       '@types/json-schema': 7.0.15
-      js-yaml: 4.3.2
+      js-yaml: 5.4.2
+      undici: 8.11.2
 
   '@apidevtools/openapi-schemas@2.1.0': {}
 
   '@apidevtools/swagger-methods@3.0.2': {}
 
-  '@apidevtools/swagger-parser@12.1.0(openapi-types@12.1.3)':
+  '@apidevtools/swagger-parser@13.1.0(openapi-types@12.1.3)':
     dependencies:
-      '@apidevtools/json-schema-ref-parser': 14.0.1
+      '@apidevtools/json-schema-ref-parser': 16.0.3(@types/json-schema@7.0.15)
       '@apidevtools/openapi-schemas': 2.1.0
       '@apidevtools/swagger-methods': 3.0.2
+      '@types/json-schema': 7.0.15
       ajv: 8.20.0
       ajv-draft-04: 1.0.0(ajv@8.20.0)
       call-me-maybe: 1.0.2
@@ -2867,9 +2880,9 @@ snapshots:
       '@tybys/wasm-util': 0.10.3
     optional: true
 
-  '@openrouter/ai-sdk-provider@3.0.0(ai@7.0.106(zod@4.6.5))(zod@4.6.5)':
+  '@openrouter/ai-sdk-provider@3.1.0(ai@7.0.114(zod@4.6.5))(zod@4.6.5)':
     dependencies:
-      ai: 7.0.106(zod@4.6.5)
+      ai: 7.0.114(zod@4.6.5)
       zod: 4.6.5
 
   '@opentelemetry/api@1.9.1':
@@ -3293,11 +3306,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ai@7.0.106(zod@4.6.5):
+  ai@7.0.114(zod@4.6.5):
     dependencies:
-      '@ai-sdk/gateway': 4.0.86(zod@4.6.5)
-      '@ai-sdk/provider': 4.0.17
-      '@ai-sdk/provider-utils': 5.0.44(zod@4.6.5)
+      '@ai-sdk/gateway': 4.0.92(zod@4.6.5)
+      '@ai-sdk/provider': 4.0.18
+      '@ai-sdk/provider-utils': 5.0.47(zod@4.6.5)
       zod: 4.6.5
 
   ajv-draft-04@1.0.0(ajv@8.20.0):
@@ -3555,16 +3568,16 @@ snapshots:
 
   escape-string-regexp@4.0.0: {}
 
-  eslint-config-functype@2.109.0(@typescript-eslint/eslint-plugin@8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint-plugin-prettier@5.5.6(eslint-config-prettier@10.1.8(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.6))(eslint-plugin-simple-import-sort@14.0.0(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.6)(supports-color@7.2.0):
+  eslint-config-functype@2.109.0(@typescript-eslint/eslint-plugin@8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint-plugin-prettier@5.5.6(eslint-config-prettier@10.1.8(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.9))(eslint-plugin-simple-import-sort@14.0.0(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.9)(supports-color@7.2.0):
     dependencies:
       '@eslint/eslintrc': 3.3.7(supports-color@7.2.0)
       '@eslint/js': 10.0.1(eslint@10.10.0(supports-color@7.2.0))
       '@typescript-eslint/eslint-plugin': 8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       '@typescript-eslint/parser': 8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
       eslint: 10.10.0(supports-color@7.2.0)
-      eslint-plugin-prettier: 5.5.6(eslint-config-prettier@10.1.8(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.6)
+      eslint-plugin-prettier: 5.5.6(eslint-config-prettier@10.1.8(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.9)
       eslint-plugin-simple-import-sort: 14.0.0(eslint@10.10.0(supports-color@7.2.0))
-      prettier: 3.9.6
+      prettier: 3.9.9
     transitivePeerDependencies:
       - supports-color
 
@@ -3576,10 +3589,10 @@ snapshots:
     dependencies:
       eslint: 10.10.0(supports-color@7.2.0)
 
-  eslint-plugin-prettier@5.5.6(eslint-config-prettier@10.1.8(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.6):
+  eslint-plugin-prettier@5.5.6(eslint-config-prettier@10.1.8(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.9):
     dependencies:
       eslint: 10.10.0(supports-color@7.2.0)
-      prettier: 3.9.6
+      prettier: 3.9.9
       prettier-linter-helpers: 1.0.1
       synckit: 0.11.13
     optionalDependencies:
@@ -3741,9 +3754,9 @@ snapshots:
 
   fast-uri@3.1.7: {}
 
-  fastmcp@4.20.14(ajv-formats@3.0.1(ajv@8.20.0))(ajv@8.20.0)(jose@6.2.12)(openapi-types@12.1.3)(supports-color@7.2.0):
+  fastmcp@4.21.2(ajv-formats@3.0.1(ajv@8.20.0))(ajv@8.20.0)(jose@6.2.12)(openapi-types@12.1.3)(supports-color@7.2.0):
     dependencies:
-      '@apidevtools/swagger-parser': 12.1.0(openapi-types@12.1.3)
+      '@apidevtools/swagger-parser': 13.1.0(openapi-types@12.1.3)
       '@modelcontextprotocol/sdk': 1.30.0(supports-color@7.2.0)(zod@4.6.5)
       '@standard-schema/spec': 1.1.0
       execa: 9.6.1
@@ -4014,6 +4027,10 @@ snapshots:
   js-tokens@10.0.0: {}
 
   js-yaml@4.3.2:
+    dependencies:
+      argparse: 2.0.1
+
+  js-yaml@5.4.2:
     dependencies:
       argparse: 2.0.1
 
@@ -4289,7 +4306,7 @@ snapshots:
     dependencies:
       fast-diff: 1.3.0
 
-  prettier@3.9.6: {}
+  prettier@3.9.9: {}
 
   pretty-ms@9.3.1:
     dependencies:
@@ -4556,21 +4573,21 @@ snapshots:
     dependencies:
       typescript: 6.0.3
 
-  ts-builds@3.4.1(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@typescript-eslint/eslint-plugin@8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(supports-color@7.2.0)(tsdown@0.23.0(typescript@6.0.3)(unrun@0.2.39(synckit@0.11.13)))(vite@8.3.0(@types/node@24.13.3)(esbuild@0.27.7)):
+  ts-builds@3.4.3(@opentelemetry/api@1.9.1)(@types/node@24.13.3)(@typescript-eslint/eslint-plugin@8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(supports-color@7.2.0)(tsdown@0.23.0(typescript@6.0.3)(unrun@0.2.39(synckit@0.11.13)))(vite@8.3.0(@types/node@24.13.3)(esbuild@0.27.7)):
     dependencies:
       '@eslint/js': 10.0.1(eslint@10.10.0(supports-color@7.2.0))
       '@vitest/coverage-v8': 4.1.11(vitest@4.1.11)
       '@vitest/ui': 4.1.11(vitest@4.1.11)
       eslint: 10.10.0(supports-color@7.2.0)
-      eslint-config-functype: 2.109.0(@typescript-eslint/eslint-plugin@8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint-plugin-prettier@5.5.6(eslint-config-prettier@10.1.8(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.6))(eslint-plugin-simple-import-sort@14.0.0(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.6)(supports-color@7.2.0)
+      eslint-config-functype: 2.109.0(@typescript-eslint/eslint-plugin@8.70.0(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(@typescript-eslint/parser@8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3))(eslint-plugin-prettier@5.5.6(eslint-config-prettier@10.1.8(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.9))(eslint-plugin-simple-import-sort@14.0.0(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.9)(supports-color@7.2.0)
       eslint-config-prettier: 10.1.8(eslint@10.10.0(supports-color@7.2.0))
       eslint-plugin-functype: 2.109.0(eslint@10.10.0(supports-color@7.2.0))
-      eslint-plugin-prettier: 5.5.6(eslint-config-prettier@10.1.8(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.6)
+      eslint-plugin-prettier: 5.5.6(eslint-config-prettier@10.1.8(eslint@10.10.0(supports-color@7.2.0)))(eslint@10.10.0(supports-color@7.2.0))(prettier@3.9.9)
       eslint-plugin-simple-import-sort: 14.0.0(eslint@10.10.0(supports-color@7.2.0))
       functype: 1.9.0
       functype-os: 1.9.0(functype@1.9.0)
       globals: 17.12.0
-      prettier: 3.9.6
+      prettier: 3.9.9
       ts-node: 10.9.2(@types/node@24.13.3)(typescript@6.0.3)
       typescript: 6.0.3
       typescript-eslint: 8.70.0(eslint@10.10.0(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
@@ -4679,6 +4696,8 @@ snapshots:
   undici-types@7.18.2: {}
 
   undici@7.29.1: {}
+
+  undici@8.11.2: {}
 
   unicorn-magic@0.3.0: {}
 

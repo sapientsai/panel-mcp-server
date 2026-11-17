@@ -3,6 +3,8 @@ allowBuilds:
   tldjs: true
 
 minimumReleaseAgeExclude:
+  - "*functype*"
+  - ts-builds
   - somamcp
 
 publicHoistPattern:

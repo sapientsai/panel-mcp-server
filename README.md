@@ -212,6 +212,7 @@ pnpm install
 pnpm validate
 
 # Development mode
+pnpm run ci    # validate's checks without fixing, as CI runs them (type `run`: `pnpm ci` is a clean install)
 pnpm dev
 
 # Run tests
